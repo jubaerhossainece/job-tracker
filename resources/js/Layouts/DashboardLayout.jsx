@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { usePage, Link } from "@inertiajs/react";
+import { UserDropdown } from "@/components/UserDropdown";
 
 export default function DashboardLayout({ children }) {
     const [isMobile, setIsMobile] = useState(false);
@@ -145,6 +146,7 @@ export default function DashboardLayout({ children }) {
                             />
                         </div>
                     </div>
+
                     <div className="flex items-center space-x-4">
                         <Button
                             variant="ghost"
@@ -155,36 +157,30 @@ export default function DashboardLayout({ children }) {
                             <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
                         </Button>
 
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    className="flex items-center gap-2"
-                                >
-                                    <Avatar className="h-8 w-8">
-                                        <AvatarImage
-                                            src="/placeholder.svg?height=32&width=32"
-                                            alt="User"
-                                        />
-                                        <AvatarFallback>
-                                            {auth?.user?.name?.charAt(0) || "U"}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <span className="hidden md:inline text-sm font-medium">
-                                        {auth?.user?.name || "User"}
-                                    </span>
-                                    <ChevronDown className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem>Profile</DropdownMenuItem>
-                                <DropdownMenuItem>Settings</DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="text-red-500">
-                                    Logout
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        {/* ✅ Use the new UserDropdown here */}
+                        <UserDropdown
+                            user={{
+                                name: auth?.user?.name || "User",
+                                email: auth?.user?.email || "user@example.com",
+                                image: auth?.user?.image || null, // if available
+                            }}
+                            onProfileClick={() =>
+                                (window.location.href = "/profile")
+                            }
+                            onSettingsClick={() =>
+                                (window.location.href = "/settings")
+                            }
+                            onNotificationsClick={() =>
+                                (window.location.href = "/notifications")
+                            }
+                            onBillingClick={() =>
+                                (window.location.href = "/billing")
+                            }
+                            onHelpClick={() => alert("Help is coming soon!")}
+                            onLogoutClick={() =>
+                                (window.location.href = "/logout")
+                            } // or use Inertia visit
+                        />
                     </div>
                 </header>
 

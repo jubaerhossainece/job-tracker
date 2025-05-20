@@ -1,97 +1,111 @@
-import { useEffect } from 'react';
-import Checkbox from '@/components/Checkbox';
-import GuestLayout from '@/Layouts/GuestLayout';
-import InputError from '@/components/InputError';
-import InputLabel from '@/components/InputLabel';
-import PrimaryButton from '@/components/PrimaryButton';
-import TextInput from '@/components/TextInput';
-import { Head, Link, useForm } from '@inertiajs/react';
+"use client"
 
-export default function Login({ status, canResetPassword }) {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        email: '',
-        password: '',
-        remember: false,
-    });
+import { useState } from "react"
+import { Eye, EyeOff, Briefcase } from "lucide-react"
+import { CustomButton } from "@/components/ui/custom-button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Link, useForm } from "@inertiajs/react"
 
-    useEffect(() => {
-        return () => {
-            reset('password');
-        };
-    }, []);
+export default function LoginPage() {
+  const [showPassword, setShowPassword] = useState(false)
 
-    const submit = (e) => {
-        e.preventDefault();
+  const { data, setData, post, processing, errors } = useForm({
+    email: "",
+    password: "",
+    remember: false,
+  })
 
-        post(route('login'));
-    };
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword)
+  }
 
-    return (
-        <GuestLayout>
-            <Head title="Log in" />
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    post(route("login"))
+  }
 
-            {status && <div className="mb-4 font-medium text-sm text-green-600">{status}</div>}
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+      <div className="w-full max-w-md">
+        <div className="flex justify-center mb-8">
+          <div className="bg-white p-3 rounded-full shadow-md">
+            <Briefcase className="h-8 w-8 text-[#4747ff]" />
+          </div>
+        </div>
 
-            <form onSubmit={submit}>
-                <div>
-                    <InputLabel htmlFor="email" value="Email" />
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
+            <CardDescription className="text-center">Enter your credentials to access your account</CardDescription>
+          </CardHeader>
 
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        isFocused={true}
-                        onChange={(e) => setData('email', e.target.value)}
+          <CardContent>
+            <form onSubmit={handleSubmit}>
+              <div className="grid gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={data.email}
+                    onChange={(e) => setData("email", e.target.value)}
+                    placeholder="name@example.com"
+                    required
+                  />
+                  {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                    <Link href={route("password.request")} className="text-sm text-[#4747ff] hover:text-[#3a3ae6]">
+                      Forgot password?
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={data.password}
+                      onChange={(e) => setData("password", e.target.value)}
+                      placeholder="••••••••"
+                      required
                     />
-
-                    <InputError message={errors.email} className="mt-2" />
+                    <button
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      <span className="sr-only">{showPassword ? "Hide password" : "Show password"}</span>
+                    </button>
+                  </div>
+                  {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
                 </div>
+              </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
-
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        autoComplete="current-password"
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
-
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
-
-                <div className="block mt-4">
-                    <label className="flex items-center">
-                        <Checkbox
-                            name="remember"
-                            checked={data.remember}
-                            onChange={(e) => setData('remember', e.target.checked)}
-                        />
-                        <span className="ms-2 text-sm text-gray-600">Remember me</span>
-                    </label>
-                </div>
-
-                <div className="flex items-center justify-end mt-4">
-                    {canResetPassword && (
-                        <Link
-                            href={route('password.request')}
-                            className="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        >
-                            Forgot your password?
-                        </Link>
-                    )}
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Log in
-                    </PrimaryButton>
-                </div>
+              <CustomButton
+                type="submit"
+                className="w-full mt-6"
+                disabled={processing}
+              >
+                {processing ? "Signing in..." : "Sign in"}
+              </CustomButton>
             </form>
-        </GuestLayout>
-    );
+          </CardContent>
+
+          <CardFooter className="flex justify-center">
+            <p className="text-sm text-muted-foreground">
+              Don&apos;t have an account?{" "}
+              <Link href={route("register")} className="text-[#4747ff] hover:text-[#3a3ae6] font-medium">
+                Sign up
+              </Link>
+            </p>
+          </CardFooter>
+        </Card>
+      </div>
+    </div>
+  )
 }

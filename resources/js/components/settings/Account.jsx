@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import { FileInput } from "@/components/ui/FileInput"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { toast } from "@/hooks/use-toast"
@@ -70,7 +71,7 @@ export function Account() {
           </div>
           <div>
             <Label htmlFor="custom-avatar">Or upload a custom avatar</Label>
-            <Input id="custom-avatar" type="file" accept="image/*" className="mt-1" />
+            <FileInput id="custom-avatar" type="file" accept="image/*" className="mt-1" />
           </div>
         </div>
         <div className="space-y-2">
