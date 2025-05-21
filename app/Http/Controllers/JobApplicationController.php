@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\JobApplication\StoreApplicationRequest;
+use App\Http\Requests\JobApplication\UpdateApplicationRequest;
 use App\Models\JobApplication;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -22,19 +24,9 @@ class JobApplicationController extends Controller
         return Inertia::render('JobApplications/Create');
     }
 
-    public function store(Request $request)
+    public function store(StoreApplicationRequest $request)
     {
-        $validated = $request->validate([
-            'company_name' => 'required|string',
-            'position_title' => 'required|string',
-            'status' => 'required|in:applied,interview,offer,rejected',
-            'applied_at' => 'required|date',
-            'job_url' => 'nullable|url',
-            'location' => 'required|string',
-            'notes' => 'nullable|string',
-            'resume' => 'nullable|file|mimes:pdf,doc,docx',
-            'cover_letter' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         // Make a copy of the validated array
         $data = $validated;
@@ -70,19 +62,9 @@ class JobApplicationController extends Controller
         ]);
     }
     
-    public function update(Request $request, JobApplication $jobApplication)
+    public function update(UpdateApplicationRequest $request, JobApplication $jobApplication)
     {
-        $validated = $request->validate([
-            'company_name' => 'required|string',
-            'position_title' => 'required|string',
-            'status' => 'required|in:applied,interview,offer,rejected',
-            'applied_at' => 'required|date',
-            'job_url' => 'nullable|url',
-            'location' => 'required|string',
-            'notes' => 'nullable|string',
-            'resume' => 'nullable|file|mimes:pdf,doc,docx',
-            'cover_letter' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
         
         // Make a copy of the validated array
         $data = $validated;

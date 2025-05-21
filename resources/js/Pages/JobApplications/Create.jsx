@@ -74,20 +74,28 @@ const JobApplicationCreate = () => {
         // Set submitting state immediately
         setIsSubmitting(true);
         
-        // Transfer all values from React Hook Form to Inertia form
+        // Create a new FormData instance
+        const formData = new FormData();
+        
+        // Add all form values to FormData
         for (const key in values) {
+            // Skip null values except for specific fields that should allow null
+            if (values[key] === null && !['resume', 'cover_letter', 'notes', 'job_url'].includes(key)) {
+                continue;
+            }
+            
             // Special handling for files
             if (key === 'resume' && values[key] instanceof File) {
-                inertiaForm.setData(key, values[key]);
-            } 
+                formData.append(key, values[key]);
+            }
             // Handle other data types
-            else if (values[key] !== null) {
-                inertiaForm.setData(key, values[key]);
+            else {
+                formData.append(key, values[key] || '');
             }
         }
         
-        // Submit the form with special handling for file uploads
-        inertiaForm.post(route('applications.store'), {
+        // Submit the form with FormData
+        inertiaForm.post(route('applications.store'), formData, {
             forceFormData: true, // Important for file uploads
             onSuccess: () => {
                 form.reset();
@@ -103,21 +111,39 @@ const JobApplicationCreate = () => {
     };
 
     return (
-        <div className="py-6">
-            <div className="flex items-center justify-between mb-6">
-                <h1 className="text-3xl font-bold">Add New Job Application</h1>
-                <Link href={route('applications.index')}>
-                    <Button variant="outline">
-                        Cancel
-                    </Button>
-                </Link>
+        <div className="py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="mb-8">
+                <div className="flex items-center justify-between mb-4">
+                    <div>
+                        <nav className="flex mb-2" aria-label="Breadcrumb">
+                            <ol className="inline-flex items-center space-x-1 text-sm text-gray-500">
+                                <li>
+                                    <Link href={route('applications.index')} className="hover:text-gray-700">Applications</Link>
+                                </li>
+                                <li className="flex items-center space-x-1">
+                                    <span>/</span>
+                                    <span className="text-gray-700">New Application</span>
+                                </li>
+                            </ol>
+                        </nav>
+                        <h1 className="text-3xl font-bold text-gray-900">Add New Job Application</h1>
+                        <p className="mt-2 text-sm text-gray-600">
+                            Track your job applications and keep all important information in one place.
+                        </p>
+                    </div>
+                    <Link href={route('applications.index')}>
+                        <Button variant="outline" className="gap-2">
+                            <span>←</span> Back to List
+                        </Button>
+                    </Link>
+                </div>
             </div>
 
-            <Card className="max-w-4xl mx-auto">
-                <CardHeader>
-                    <CardTitle>Job Application Details</CardTitle>
-                    <CardDescription>
-                        Enter the details for your new job application. Fields marked with * are required.
+            <Card className="max-w-4xl mx-auto shadow-sm">
+                <CardHeader className="border-b bg-gray-50/50">
+                    <CardTitle className="text-xl">Job Application Details</CardTitle>
+                    <CardDescription className="text-gray-600">
+                        Fill in the details below to track your job application. Fields marked with * are required.
                     </CardDescription>
                 </CardHeader>
                 

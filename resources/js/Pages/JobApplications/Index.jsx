@@ -56,19 +56,16 @@ const JobApplicationsIndex = () => {
     const getStatusVariant = (status) => {
         switch(status?.toLowerCase()) {
             case 'applied':
-                return { variant: "default", className: "bg-blue-500 hover:bg-blue-600" };
+                return { variant: "secondary", className: "bg-blue-600 hover:bg-blue-700 text-white font-medium" };
             case 'interview':
-                return { variant: "secondary", className: "bg-purple-500 text-white hover:bg-purple-600" };
+                return { variant: "secondary", className: "bg-indigo-600 hover:bg-indigo-700 text-white font-medium" };
+            case 'offer':
             case 'offered':
-                return { variant: "default", className: "bg-green-500 hover:bg-green-600" };
+                return { variant: "secondary", className: "bg-emerald-600 hover:bg-emerald-700 text-white font-medium" };
             case 'rejected':
-                return { variant: "destructive" };
-            case 'accepted':
-                return { variant: "default", className: "bg-emerald-500 hover:bg-emerald-600" };
-            case 'withdrawn':
-                return { variant: "outline", className: "text-gray-500 border-gray-300" };
+                return { variant: "secondary", className: "bg-rose-600 hover:bg-rose-700 text-white font-medium" };
             default:
-                return { variant: "outline" };
+                return { variant: "secondary", className: "bg-gray-600 hover:bg-gray-700 text-white font-medium" };
         }
     };
 
@@ -165,50 +162,39 @@ const JobApplicationsIndex = () => {
                         <Table>
                             <TableHeader>
                                 <TableRow className="bg-slate-50">
-                                    <TableHead 
-                                        className="cursor-pointer hover:bg-slate-100" 
-                                        onClick={() => handleSort("company_name")}
-                                    >
+                                    <TableHead className="cursor-pointer hover:bg-slate-100" onClick={() => handleSort("company_name")}>
                                         Company
                                         {sortBy.field === "company_name" && (
                                             <span className="ml-1">{sortBy.ascending ? "↑" : "↓"}</span>
                                         )}
                                     </TableHead>
-                                    <TableHead 
-                                        className="cursor-pointer hover:bg-slate-100"
-                                        onClick={() => handleSort("position_title")}
-                                    >
+                                    <TableHead className="cursor-pointer hover:bg-slate-100" onClick={() => handleSort("position_title")}>
                                         Position
                                         {sortBy.field === "position_title" && (
                                             <span className="ml-1">{sortBy.ascending ? "↑" : "↓"}</span>
                                         )}
                                     </TableHead>
-                                    <TableHead 
-                                        className="cursor-pointer hover:bg-slate-100"
-                                        onClick={() => handleSort("status")}
-                                    >
+                                    <TableHead className="cursor-pointer hover:bg-slate-100" onClick={() => handleSort("status")}>
                                         Status
                                         {sortBy.field === "status" && (
                                             <span className="ml-1">{sortBy.ascending ? "↑" : "↓"}</span>
                                         )}
                                     </TableHead>
-                                    <TableHead 
-                                        className="cursor-pointer hover:bg-slate-100"
-                                        onClick={() => handleSort("applied_at")}
-                                    >
+                                    <TableHead className="cursor-pointer hover:bg-slate-100" onClick={() => handleSort("applied_at")}>
                                         Applied
                                         {sortBy.field === "applied_at" && (
                                             <span className="ml-1">{sortBy.ascending ? "↑" : "↓"}</span>
                                         )}
                                     </TableHead>
                                     <TableHead>Location</TableHead>
-                                    <TableHead>Actions & Documents</TableHead>
+                                    <TableHead>Documents</TableHead>
+                                    <TableHead>Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {filteredApplications.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                                        <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                                             No applications found.
                                         </TableCell>
                                     </TableRow>
@@ -234,9 +220,11 @@ const JobApplicationsIndex = () => {
                                                 <Calendar size={14} className="text-gray-500" />
                                                 {formatDate(app.applied_at)}
                                             </TableCell>
-                                            <TableCell className="flex items-center gap-1">
-                                                <MapPin size={14} className="text-gray-500" />
-                                                {app.location || "Remote"}
+                                            <TableCell>
+                                                <div className="flex items-center gap-1">
+                                                    <MapPin size={14} className="text-gray-500" />
+                                                    {app.location || "Remote"}
+                                                </div>
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-2">
@@ -245,7 +233,7 @@ const JobApplicationsIndex = () => {
                                                             href={`/storage/${app.resume_path}`}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                                                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 whitespace-nowrap"
                                                             title="View Resume"
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
@@ -253,25 +241,22 @@ const JobApplicationsIndex = () => {
                                                             <span className="sr-only md:not-sr-only">Resume</span>
                                                         </a>
                                                     ) : null}
-                                                    
                                                     {app.cover_letter ? (
-                                                        <a
-                                                            href="#"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                window.location.href = route('applications.show', app.id);
-                                                            }}
-                                                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800"
-                                                            title="View Cover Letter"
+                                                        <span
+                                                            className="inline-flex items-center gap-1 text-blue-600 whitespace-nowrap"
+                                                            title="Has Cover Letter"
                                                         >
                                                             <FileCheck size={16} />
                                                             <span className="sr-only md:not-sr-only">Cover Letter</span>
-                                                        </a>
+                                                        </span>
                                                     ) : null}
-                                                    
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center gap-2 justify-start">
                                                     <Link
                                                         href={route('applications.show', app.id)}
-                                                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 ml-2"
+                                                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 whitespace-nowrap"
                                                         onClick={(e) => e.stopPropagation()}
                                                     >
                                                         <Eye size={16} />
@@ -279,7 +264,7 @@ const JobApplicationsIndex = () => {
                                                     </Link>
                                                     <Link
                                                         href={route('applications.edit', app.id)}
-                                                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 ml-2"
+                                                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 whitespace-nowrap"
                                                         onClick={(e) => e.stopPropagation()}
                                                     >
                                                         <Edit size={16} />

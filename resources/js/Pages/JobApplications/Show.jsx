@@ -23,7 +23,8 @@ import {
     FileEdit,
     Clock,
     Trash2,
-    AlertTriangle
+    AlertTriangle,
+    Edit
 } from "lucide-react";
 
 const JobApplicationShow = () => {
@@ -51,54 +52,89 @@ const JobApplicationShow = () => {
     const getStatusVariant = (status) => {
         switch(status?.toLowerCase()) {
             case 'applied':
-                return { variant: "default", className: "bg-blue-500 hover:bg-blue-600" };
+                return { variant: "secondary", className: "bg-blue-600 hover:bg-blue-700 text-white font-medium" };
             case 'interview':
-                return { variant: "secondary", className: "bg-purple-500 text-white hover:bg-purple-600" };
+                return { variant: "secondary", className: "bg-indigo-600 hover:bg-indigo-700 text-white font-medium" };
             case 'offer':
-                return { variant: "default", className: "bg-green-500 hover:bg-green-600" };
+                return { variant: "secondary", className: "bg-emerald-600 hover:bg-emerald-700 text-white font-medium" };
             case 'rejected':
-                return { variant: "destructive" };
+                return { variant: "secondary", className: "bg-rose-600 hover:bg-rose-700 text-white font-medium" };
             default:
-                return { variant: "outline" };
+                return { variant: "secondary", className: "bg-gray-600 hover:bg-gray-700 text-white font-medium" };
+        }
+    };
+
+    // Status card header colors
+    const getStatusColors = (status) => {
+        switch(status?.toLowerCase()) {
+            case 'applied':
+                return 'bg-blue-50 border-blue-100';
+            case 'interview':
+                return 'bg-indigo-50 border-indigo-100';
+            case 'offer':
+                return 'bg-emerald-50 border-emerald-100';
+            case 'rejected':
+                return 'bg-rose-50 border-rose-100';
+            default:
+                return 'bg-gray-50 border-gray-100';
         }
     };
     
     return (
-        <div className="py-6">
-            <div className="flex items-center justify-between mb-6">
-                <h1 className="text-3xl font-bold">
-                    {application.position_title} at {application.company_name}
-                </h1>
-                <div className="flex space-x-3">
-                    <Link href={route('applications.index')}>
-                        <Button variant="outline">
-                            Back to List
-                        </Button>
-                    </Link>
-                    <Link href={route('applications.edit', application.id)}>
-                        <CustomButton>
-                            Edit Application
-                        </CustomButton>
-                    </Link>
+        <div className="py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="mb-8">
+                <div className="flex items-center justify-between mb-4">
+                    <div>
+                        <nav className="flex mb-2" aria-label="Breadcrumb">
+                            <ol className="inline-flex items-center space-x-1 text-sm text-gray-500">
+                                <li>
+                                    <Link href={route('applications.index')} className="hover:text-gray-700">Applications</Link>
+                                </li>
+                                <li className="flex items-center space-x-1">
+                                    <span>/</span>
+                                    <span className="text-gray-700">View Application</span>
+                                </li>
+                            </ol>
+                        </nav>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-3xl font-bold text-gray-900">
+                                {application.position_title}
+                            </h1>
+                            <Badge {...getStatusVariant(application.status)} className="text-base py-1 px-3">
+                                {application.status}
+                            </Badge>
+                        </div>
+                        <p className="mt-2 text-sm text-gray-600 flex items-center gap-2">
+                            <Building2 className="text-gray-500" size={16} />
+                            {application.company_name}
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <Link href={route('applications.index')}>
+                            <Button variant="outline" className="gap-2">
+                                <span>←</span> Back to List
+                            </Button>
+                        </Link>
+                        <Link href={route('applications.edit', application.id)}>
+                            <CustomButton className="gap-2">
+                                <Edit size={16} />
+                                Edit
+                            </CustomButton>
+                        </Link>
+                    </div>
                 </div>
             </div>
 
-            <Card className="max-w-4xl mx-auto">
-                <CardHeader>
+            <Card className="max-w-4xl mx-auto shadow-sm">
+                <CardHeader className={`border-b ${getStatusColors(application.status)}`}>
                     <div className="flex justify-between items-center">
                         <div>
-                            <CardTitle className="flex items-center gap-2">
-                                <Building2 className="text-gray-500" size={24} />
-                                {application.company_name}
-                            </CardTitle>
-                            <CardDescription className="text-lg font-medium mt-1">
-                                {application.position_title}
+                            <CardTitle className="text-xl">Application Details</CardTitle>
+                            <CardDescription className="text-gray-600">
+                                Application Status: <span className="font-medium">{application.status.charAt(0).toUpperCase() + application.status.slice(1)}</span>
                             </CardDescription>
                         </div>
-                        <Badge 
-                            {...getStatusVariant(application.status)} 
-                            className="text-base py-1 px-3"
-                        >
+                        <Badge {...getStatusVariant(application.status)} className="text-base py-1 px-3">
                             {application.status}
                         </Badge>
                     </div>
