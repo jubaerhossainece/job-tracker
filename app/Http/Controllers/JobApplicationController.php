@@ -16,6 +16,11 @@ class JobApplicationController extends Controller
             'applications' => $applications,
         ]);
     }
+    
+    public function create()
+    {
+        return Inertia::render('JobApplications/Create');
+    }
 
     public function store(Request $request)
     {
@@ -28,15 +33,82 @@ class JobApplicationController extends Controller
             'location' => 'required|string',
             'notes' => 'nullable|string',
             'resume' => 'nullable|file|mimes:pdf,doc,docx',
-            'cover_letter' => 'nullable|string', // now a text field
+            'cover_letter' => 'nullable|string',
         ]);
 
+        // Make a copy of the validated array
+        $data = $validated;
+        
+        // Handle file storage separately
         if ($request->hasFile('resume')) {
-            $validated['resume_path'] = $request->file('resume')->store('resumes');
+            $resume = $request->file('resume');
+            $data['resume_path'] = $resume->store('resumes', 'public');
+        }
+        
+        // Remove resume from data array as it's not a database field
+        if (isset($data['resume'])) {
+            unset($data['resume']);
         }
 
-        $job = JobApplication::create($validated);
+        $job = JobApplication::create($data);
 
-        return response()->json($job, 201);
+        return redirect()->route('applications.index')
+            ->with('success', 'Job application created successfully!');
+    }
+    
+    public function show(JobApplication $jobApplication)
+    {
+        return Inertia::render('JobApplications/Show', [
+            'application' => $jobApplication
+        ]);
+    }
+    
+    public function edit(JobApplication $jobApplication)
+    {
+        return Inertia::render('JobApplications/Edit', [
+            'application' => $jobApplication
+        ]);
+    }
+    
+    public function update(Request $request, JobApplication $jobApplication)
+    {
+        $validated = $request->validate([
+            'company_name' => 'required|string',
+            'position_title' => 'required|string',
+            'status' => 'required|in:applied,interview,offer,rejected',
+            'applied_at' => 'required|date',
+            'job_url' => 'nullable|url',
+            'location' => 'required|string',
+            'notes' => 'nullable|string',
+            'resume' => 'nullable|file|mimes:pdf,doc,docx',
+            'cover_letter' => 'nullable|string',
+        ]);
+        
+        // Make a copy of the validated array
+        $data = $validated;
+        
+        // Handle resume upload if a new one is provided
+        if ($request->hasFile('resume')) {
+            $resume = $request->file('resume');
+            $data['resume_path'] = $resume->store('resumes', 'public');
+        }
+        
+        // Remove resume from data array as it's not a database field
+        if (isset($data['resume'])) {
+            unset($data['resume']);
+        }
+        
+        $jobApplication->update($data);
+        
+        return redirect()->route('applications.index')
+            ->with('success', 'Job application updated successfully!');
+    }
+    
+    public function destroy(JobApplication $jobApplication)
+    {
+        $jobApplication->delete();
+        
+        return redirect()->route('applications.index')
+            ->with('success', 'Job application deleted successfully!');
     }
 }

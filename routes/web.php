@@ -38,8 +38,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
 
-    Route::get('/applications', [JobApplicationController::class, 'index']);
-    Route::post('/applications', [JobApplicationController::class, 'store']);
+    Route::get('/applications', [JobApplicationController::class, 'index'])->name('applications.index');
+    Route::get('/applications/create', [JobApplicationController::class, 'create'])->name('applications.create');
+    Route::post('/applications', [JobApplicationController::class, 'store'])->name('applications.store');
+    Route::get('/applications/{jobApplication}', [JobApplicationController::class, 'show'])->name('applications.show');
+    Route::get('/applications/{jobApplication}/edit', [JobApplicationController::class, 'edit'])->name('applications.edit');
+    Route::put('/applications/{jobApplication}', [JobApplicationController::class, 'update'])->name('applications.update');
+    Route::delete('/applications/{jobApplication}', [JobApplicationController::class, 'destroy'])->name('applications.destroy');
 
     Route::get('/settings', [SettingController::class, 'index']);
 

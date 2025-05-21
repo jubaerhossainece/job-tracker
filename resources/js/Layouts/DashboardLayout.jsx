@@ -27,6 +27,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { usePage, Link } from "@inertiajs/react";
 import { UserDropdown } from "@/components/UserDropdown";
+import { FlashMessage } from "@/components/FlashMessage";
 
 export default function DashboardLayout({ children }) {
     const [isMobile, setIsMobile] = useState(false);
@@ -50,6 +51,9 @@ export default function DashboardLayout({ children }) {
 
     return (
         <div className="flex h-screen bg-gray-50">
+            {/* Flash Message */}
+            <FlashMessage />
+            
             {/* Mobile Sidebar Toggle */}
             {isMobile && (
                 <Button
