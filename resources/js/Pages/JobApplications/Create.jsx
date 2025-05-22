@@ -74,26 +74,45 @@ const JobApplicationCreate = () => {
         // Set submitting state immediately
         setIsSubmitting(true);
         
-        // Transfer all values from React Hook Form to Inertia form
+        // Create FormData for file uploads
+        const formData = new FormData();
+        
+        // Process and add all values to formData
         for (const key in values) {
+            // Special handling for date field
+            if (key === 'applied_at' && values[key]) {
+                const dateValue = values[key] instanceof Date 
+                    ? values[key].toISOString().split('T')[0] // Format as YYYY-MM-DD
+                    : values[key];
+                formData.append(key, dateValue);
+                inertiaForm.setData(key, dateValue);
+            }
             // Special handling for files
-            if (key === 'resume' && values[key] instanceof File) {
+            else if (key === 'resume' && values[key] instanceof File) {
+                formData.append(key, values[key]);
                 inertiaForm.setData(key, values[key]);
             } 
             // Handle other data types
-            else if (values[key] !== null) {
+            else if (values[key] !== null && values[key] !== undefined) {
+                formData.append(key, values[key]);
                 inertiaForm.setData(key, values[key]);
             }
         }
         
-        // Submit the form with special handling for file uploads
-        inertiaForm.post(route('applications.store'), {
+        // Submit the form with FormData
+        inertiaForm.post(route('applications.store'), formData, {
             forceFormData: true, // Important for file uploads
             onSuccess: () => {
                 form.reset();
+                // You could add a success message here
             },
             onError: (errors) => {
                 console.error('Form submission errors:', errors);
+                // Scroll to the first error if any
+                const firstErrorField = Object.keys(errors)[0];
+                if (firstErrorField) {
+                    document.querySelector(`[name="${firstErrorField}"]`)?.focus();
+                }
             },
             onFinish: () => {
                 setIsSubmitting(false);
@@ -217,9 +236,14 @@ const JobApplicationCreate = () => {
                                             </FormLabel>
                                             <FormControl>
                                                 <DatePicker
-                                                    value={field.value ? new Date(field.value) : undefined}
-                                                    onChange={field.onChange}
-                                                    {...field}
+                                                    value={field.value ? new Date(field.value) : new Date()}
+                                                    onChange={(date) => {
+                                                        // Store as ISO string format (YYYY-MM-DD)
+                                                        const formattedDate = date instanceof Date 
+                                                            ? date.toISOString().split('T')[0]
+                                                            : date;
+                                                        field.onChange(formattedDate);
+                                                    }}
                                                 />
                                             </FormControl>
                                             {inertiaForm.errors.applied_at && (

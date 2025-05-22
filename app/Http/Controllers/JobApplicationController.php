@@ -24,36 +24,50 @@ class JobApplicationController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'company_name' => 'required|string',
-            'position_title' => 'required|string',
-            'status' => 'required|in:applied,interview,offer,rejected',
-            'applied_at' => 'required|date',
-            'job_url' => 'nullable|url',
-            'location' => 'required|string',
-            'notes' => 'nullable|string',
-            'resume' => 'nullable|file|mimes:pdf,doc,docx',
-            'cover_letter' => 'nullable|string',
-        ]);
-
-        // Make a copy of the validated array
-        $data = $validated;
-        
-        // Handle file storage separately
-        if ($request->hasFile('resume')) {
-            $resume = $request->file('resume');
-            $data['resume_path'] = $resume->store('resumes', 'public');
+        try {
+            $validated = $request->validate([
+                'company_name' => 'required|string',
+                'position_title' => 'required|string',
+                'status' => 'required|in:applied,interview,offer,rejected',
+                'applied_at' => 'required|date',
+                'job_url' => 'nullable|url',
+                'location' => 'required|string',
+                'notes' => 'nullable|string',
+                'resume' => 'nullable|file|mimes:pdf,doc,docx',
+                'cover_letter' => 'nullable|string',
+            ]);
+    
+            // Make a copy of the validated array
+            $data = $validated;
+            
+            // Ensure applied_at is properly formatted
+            if (isset($data['applied_at'])) {
+                $data['applied_at'] = date('Y-m-d', strtotime($data['applied_at']));
+            }
+            
+            // Handle file storage separately
+            if ($request->hasFile('resume')) {
+                $resume = $request->file('resume');
+                $data['resume_path'] = $resume->store('resumes', 'public');
+            }
+            
+            // Remove resume from data array as it's not a database field
+            if (isset($data['resume'])) {
+                unset($data['resume']);
+            }
+    
+            $job = JobApplication::create($data);
+    
+            return redirect()->route('applications.index')
+                ->with('success', 'Job application created successfully!');
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Job application creation error: ' . $e->getMessage());
+            
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'There was a problem creating your job application. Please try again.']);
         }
-        
-        // Remove resume from data array as it's not a database field
-        if (isset($data['resume'])) {
-            unset($data['resume']);
-        }
-
-        $job = JobApplication::create($data);
-
-        return redirect()->route('applications.index')
-            ->with('success', 'Job application created successfully!');
     }
     
     public function show(JobApplication $jobApplication)
