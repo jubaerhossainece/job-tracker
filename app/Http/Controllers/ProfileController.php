@@ -18,9 +18,20 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
-        return Inertia::render('Profile/Edit', [
+        $user = $request->user()->load(['preferences', 'securitySettings']);
+        
+        return Inertia::render('Profile/Show', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'created_at' => $user->created_at->format('M d, Y'),
+                'email_verified_at' => $user->email_verified_at ? $user->email_verified_at->format('M d, Y') : null,
+                'preferences' => $user->preferences,
+                'security_settings' => $user->securitySettings,
+            ]
         ]);
     }
 

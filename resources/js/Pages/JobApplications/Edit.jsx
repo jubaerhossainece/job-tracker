@@ -100,64 +100,41 @@ const JobApplicationEdit = () => {
     });
 
     const handleSubmit = (values) => {
-        // Prevent double submission
-        if (isSubmitting) {
-            return;
-        }
-        
-        // Set submitting state immediately
+        if (isSubmitting) return;
         setIsSubmitting(true);
-        
-        try {
-            // Create a new FormData instance
-            const formData = new FormData();
-            
-            // Add _method for Laravel to handle PUT request
-            formData.append('_method', 'PUT');
-            
-            // Add all form values to FormData
-            Object.keys(values).forEach(key => {
-                // Skip null/undefined values for required fields
-                if (values[key] === null && ['company_name', 'position_title', 'status', 'applied_at', 'location'].includes(key)) {
-                    return;
-                }
-                
-                // Handle date field
-                if (key === 'applied_at' && values[key]) {
-                    const date = new Date(values[key]);
-                    formData.append(key, date.toISOString().split('T')[0]);
-                    return;
-                }
-                
-                // Handle file upload
-                if (key === 'resume' && values[key] instanceof File) {
-                    formData.append(key, values[key]);
-                    return;
-                }
-            
-            // Handle optional fields that can be null/empty
-            if (key === 'job_url' || key === 'cover_letter' || key === 'notes') {
-                formData.append(key, values[key] || '');
-                continue;
+
+        // Create a new FormData instance and add data
+        const formData = new FormData();
+
+        // Add all form values to FormData with proper handling
+        Object.keys(values).forEach(key => {
+            if (key === 'applied_at' && values[key]) {
+                // Format date
+                const date = values[key] instanceof Date ? values[key] : new Date(values[key]);
+                formData.append(key, date.toISOString().split('T')[0]);
+                return;
             }
             
-            // Handle all other required fields
+            // Handle file upload
+            if (key === 'resume' && values[key] instanceof File) {
+                formData.append(key, values[key]);
+                return;
+            }
+            
+            // Handle regular fields
             if (values[key] !== null && values[key] !== undefined) {
                 formData.append(key, values[key]);
             }
-        }
+        });
         
-        // Submit the form with FormData and _method for proper PUT handling
-        formData.append('_method', 'PUT');
-        inertiaForm.put(route('applications.update', application.id), formData, {
-            forceFormData: true, // Important for file uploads
-            onError: (errors) => {
-                console.error('Form submission errors:', errors);
-            },
-            onFinish: () => {
-                setIsSubmitting(false);
-            },
-            preserveScroll: true
+        // Submit the form
+        inertiaForm.submit('put', route('applications.update', application.id), {
+            data: formData,
+            forceFormData: true,
+            onSuccess: () => setIsSubmitting(false),
+            onError: () => setIsSubmitting(false),
+            preserveScroll: true,
+            preserveState: true
         });
     };
 
