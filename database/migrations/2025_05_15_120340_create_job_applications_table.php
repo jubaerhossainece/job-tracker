@@ -32,6 +32,7 @@ return new class extends Migration
             $table->date('follow_up_date')->nullable();
             $table->integer('priority')->default(1); // 1-5 priority scale
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
