@@ -1,21 +1,19 @@
 import React, { useState } from "react";
-import { useForm as useInertiaForm, Link, usePage } from "@inertiajs/react";
-import { useForm as useReactHookForm } from "react-hook-form";
+import { useForm, Link } from "@inertiajs/react";
 import DashboardLayout from "@/Layouts/DashboardLayout";
-import { 
+import {
     Card,
     CardHeader,
     CardTitle,
     CardDescription,
     CardContent,
-    CardFooter
+    CardFooter,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { CustomButton } from "@/components/ui/custom-button";
-import { DatePicker } from "@/components/ui/date-picker";
+import { CustomDatePicker } from "@/components/ui/custom/custom-date-picker";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
     Select,
     SelectContent,
@@ -24,427 +22,296 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { 
-    Form, 
-    FormControl, 
-    FormField, 
-    FormItem, 
-    FormLabel, 
-    FormMessage 
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from "@/components/ui/form";
-import { FileInput } from "@/components/ui/FileInput";
-import { CalendarDays, Building2, BriefcaseBusiness, MapPin, Link2, FileText, FileEdit } from "lucide-react";
+import {
+    Building2,
+    MapPin,
+    FileText,
+    Briefcase,
+    ArrowLeft,
+    Calendar,
+    ExternalLink,
+    User,
+    Upload,
+} from "lucide-react";
 
-// Status badge variants helper
-const getStatusVariant = (status) => {
-    switch(status?.toLowerCase()) {
-        case 'applied':
-            return { variant: "secondary", className: "bg-blue-600 hover:bg-blue-700 text-white font-medium" };
-        case 'interview':
-            return { variant: "secondary", className: "bg-indigo-600 hover:bg-indigo-700 text-white font-medium" };
-        case 'offer':
-            return { variant: "secondary", className: "bg-emerald-600 hover:bg-emerald-700 text-white font-medium" };
-        case 'rejected':
-            return { variant: "secondary", className: "bg-rose-600 hover:bg-rose-700 text-white font-medium" };
-        default:
-            return { variant: "secondary", className: "bg-gray-600 hover:bg-gray-700 text-white font-medium" };
-    }
-};
-
-// Status card header colors helper
-const getStatusColors = (status) => {
-    switch(status?.toLowerCase()) {
-        case 'applied':
-            return 'bg-blue-50 border-blue-100';
-        case 'interview':
-            return 'bg-indigo-50 border-indigo-100';
-        case 'offer':
-            return 'bg-emerald-50 border-emerald-100';
-        case 'rejected':
-            return 'bg-rose-50 border-rose-100';
-        default:
-            return 'bg-gray-50 border-gray-100';
-    }
-};
-
-const JobApplicationEdit = () => {
-    const { application } = usePage().props;
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    
-    // Separate the form for react-hook-form and Inertia form handling
-    const inertiaForm = useInertiaForm({
-        company_name: application.company_name,
-        position_title: application.position_title,
-        status: application.status,
-        applied_at: application.applied_at.substr(0, 10), // Format YYYY-MM-DD
-        job_url: application.job_url || '',
-        location: application.location,
-        notes: application.notes || '',
+const JobApplicationEdit = ({ application }) => {
+    const { data, setData, post, processing, errors, reset } = useForm({
+        company_name: application.company_name || "",
+        position_title: application.position_title || "",
+        location: application.location || "",
+        status: application.status || "applied",
+        applied_at:
+            application.applied_at || new Date().toISOString().split("T")[0],
+        job_url: application.job_url || "",
+        notes: application.notes || "",
+        cover_letter: application.cover_letter || "",
         resume: null,
-        cover_letter: application.cover_letter || '',
-    });
-    
-    // Create separate form for react-hook-form (shadcn/ui forms)
-    const form = useReactHookForm({
-        defaultValues: {
-            company_name: application.company_name,
-            position_title: application.position_title,
-            status: application.status,
-            applied_at: application.applied_at.substr(0, 10), // Format YYYY-MM-DD
-            job_url: application.job_url || '',
-            location: application.location,
-            notes: application.notes || '',
-            resume: null,
-            cover_letter: application.cover_letter || '',
-        }
+        _method: "PUT", // required for PUT method
     });
 
-    const handleSubmit = (values) => {
-        if (isSubmitting) return;
-        setIsSubmitting(true);
+    const [resumeFile, setResumeFile] = useState(null);
 
-        // Create a new FormData instance and add data
-        const formData = new FormData();
+    const handleChange = (e) => {
+        setData(e.target.name, e.target.value);
+    };
 
-        // Add all form values to FormData with proper handling
-        Object.keys(values).forEach(key => {
-            if (key === 'applied_at' && values[key]) {
-                // Format date
-                const date = values[key] instanceof Date ? values[key] : new Date(values[key]);
-                formData.append(key, date.toISOString().split('T')[0]);
-                return;
-            }
-            
-            // Handle file upload
-            if (key === 'resume' && values[key] instanceof File) {
-                formData.append(key, values[key]);
-                return;
-            }
-            
-            // Handle regular fields
-            if (values[key] !== null && values[key] !== undefined) {
-                formData.append(key, values[key]);
-            }
-        });
-        
-        // Submit the form
-        inertiaForm.submit('put', route('applications.update', application.id), {
-            data: formData,
+    const handleFileChange = (e) => {
+        setData("resume", e.target.files[0]);
+    };
+
+    const handleStatusChange = (value) => {
+        setData("status", value);
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        post(route("applications.update", application.id), {
             forceFormData: true,
-            onSuccess: () => setIsSubmitting(false),
-            onError: () => setIsSubmitting(false),
-            preserveScroll: true,
-            preserveState: true
+            onSuccess: () => {
+                reset(); // optional — clears all fields including file
+            },
+            onError: (errors) => {
+                console.error("Form submission errors:", errors);
+            },
         });
     };
 
     return (
-        <div className="py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                    <div>
-                        <nav className="flex mb-2" aria-label="Breadcrumb">
-                            <ol className="inline-flex items-center space-x-1 text-sm text-gray-500">
-                                <li>
-                                    <Link href={route('applications.index')} className="hover:text-gray-700">Applications</Link>
-                                </li>
-                                <li className="flex items-center space-x-1">
-                                    <span>/</span>
-                                    <span className="text-gray-700">Edit Application</span>
-                                </li>
-                            </ol>
-                        </nav>
-                        <h1 className="text-3xl font-bold text-gray-900">
-                            Edit {application.position_title} at {application.company_name}
-                        </h1>
-                        <p className="mt-2 text-sm text-gray-600">
-                            Update the application details and track your progress.
-                        </p>
-                    </div>
-                    <Link href={route('applications.index')}>
-                        <Button variant="outline" className="gap-2">
-                            <span>←</span> Back to List
-                        </Button>
+        <>
+            <div className="mb-6 flex items-center">
+                <Button variant="ghost" size="icon" asChild className="mr-2">
+                    <Link href={route("applications.show", application.id)}>
+                        <ArrowLeft className="h-4 w-4" />
+                        <span className="sr-only">Back</span>
                     </Link>
-                </div>
+                </Button>
+                <h1 className="text-2xl font-bold">Edit Job Application</h1>
             </div>
 
-            <Card className="max-w-4xl mx-auto shadow-sm">
-                <CardHeader className={`border-b ${getStatusColors(application.status)}`}>
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <CardTitle className="text-xl">Application Details</CardTitle>
-                            <CardDescription className="text-gray-600">
-                                Update the details below. Fields marked with * are required.
-                            </CardDescription>
-                        </div>
-                        <Badge {...getStatusVariant(application.status)} className="text-base py-1 px-3">
-                            {application.status}
-                        </Badge>
-                    </div>
+            <Card className="mx-auto max-w-3xl">
+                <CardHeader>
+                    <CardTitle>Job Details</CardTitle>
+                    <CardDescription>
+                        Update the details of your job application.
+                    </CardDescription>
                 </CardHeader>
-                
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit((data) => handleSubmit(data))}>
-                        <CardContent className="pt-6 space-y-6">
-                            {/* Company and Position Section */}
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <FormField
-                                    control={form.control}
-                                    name="company_name"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="flex items-center gap-2">
-                                                <Building2 size={16} />
-                                                Company Name *
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="Enter company name"
-                                                    {...field}
-                                                    required
-                                                />
-                                            </FormControl>
-                                            {inertiaForm.errors.company_name && (
-                                                <FormMessage>{inertiaForm.errors.company_name}</FormMessage>
-                                            )}
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="position_title"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="flex items-center gap-2">
-                                                <BriefcaseBusiness size={16} />
-                                                Position Title *
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="Enter position title"
-                                                    {...field}
-                                                    required
-                                                />
-                                            </FormControl>
-                                            {inertiaForm.errors.position_title && (
-                                                <FormMessage>{inertiaForm.errors.position_title}</FormMessage>
-                                            )}
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-
-                            {/* Status and Date Section */}
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <FormField
-                                    control={form.control}
-                                    name="status"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Application Status *</FormLabel>
-                                            <Select
-                                                value={field.value}
-                                                onValueChange={field.onChange}
-                                            >
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select status" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectGroup>
-                                                        <SelectItem value="applied">Applied</SelectItem>
-                                                        <SelectItem value="interview">Interview</SelectItem>
-                                                        <SelectItem value="offer">Offer</SelectItem>
-                                                        <SelectItem value="rejected">Rejected</SelectItem>
-                                                    </SelectGroup>
-                                                </SelectContent>
-                                            </Select>
-                                            {inertiaForm.errors.status && (
-                                                <FormMessage>{inertiaForm.errors.status}</FormMessage>
-                                            )}
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="applied_at"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="flex items-center gap-2">
-                                                <CalendarDays size={16} />
-                                                Date Applied *
-                                            </FormLabel>
-                                            <FormControl>
-                                                <DatePicker
-                                                    value={field.value ? new Date(field.value) : undefined}
-                                                    onChange={field.onChange}
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            {inertiaForm.errors.applied_at && (
-                                                <FormMessage>{inertiaForm.errors.applied_at}</FormMessage>
-                                            )}
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-
-                            {/* Location and URL Section */}
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <FormField
-                                    control={form.control}
-                                    name="location"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="flex items-center gap-2">
-                                                <MapPin size={16} />
-                                                Location *
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="City, State or Remote"
-                                                    {...field}
-                                                    required
-                                                />
-                                            </FormControl>
-                                            {inertiaForm.errors.location && (
-                                                <FormMessage>{inertiaForm.errors.location}</FormMessage>
-                                            )}
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="job_url"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="flex items-center gap-2">
-                                                <Link2 size={16} />
-                                                Job URL
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="url"
-                                                    placeholder="https://example.com/job-posting"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            {inertiaForm.errors.job_url && (
-                                                <FormMessage>{inertiaForm.errors.job_url}</FormMessage>
-                                            )}
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-
-                            {/* Resume Section */}
-                            <FormField
-                                control={form.control}
-                                name="resume"
-                                render={({ field: { value, onChange, ...fieldProps } }) => (
-                                    <FormItem>
-                                        <FormLabel className="flex items-center gap-2">
-                                            <FileText size={16} />
-                                            Resume
-                                        </FormLabel>
-                                        <FormControl>
-                                            <FileInput
-                                                className="w-full"
-                                                {...fieldProps}
-                                                onChange={(e) => {
-                                                    const file = e.target.files[0] || null;
-                                                    onChange(file);
-                                                }}
-                                            />
-                                        </FormControl>
-                                        <p className="text-sm text-gray-500">
-                                            {application.resume_path 
-                                                ? "Current resume on file. Upload a new one to replace it."
-                                                : "Upload your resume (PDF, DOC, DOCX)"}
-                                        </p>
-                                        {inertiaForm.errors.resume && (
-                                            <FormMessage>{inertiaForm.errors.resume}</FormMessage>
-                                        )}
-                                    </FormItem>
-                                )}
-                            />
-
-                            {/* Cover Letter Section */}
-                            <FormField
-                                control={form.control}
-                                name="cover_letter"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="flex items-center gap-2">
-                                            <FileEdit size={16} />
-                                            Cover Letter
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Textarea
-                                                placeholder="Enter your cover letter text here"
-                                                className="min-h-[200px]"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        {inertiaForm.errors.cover_letter && (
-                                            <FormMessage>{inertiaForm.errors.cover_letter}</FormMessage>
-                                        )}
-                                    </FormItem>
-                                )}
-                            />
-
-                            {/* Notes Section */}
-                            <FormField
-                                control={form.control}
-                                name="notes"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Notes</FormLabel>
-                                        <FormControl>
-                                            <Textarea
-                                                placeholder="Additional notes about this application"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        {inertiaForm.errors.notes && (
-                                            <FormMessage>{inertiaForm.errors.notes}</FormMessage>
-                                        )}
-                                    </FormItem>
-                                )}
-                            />
-                        </CardContent>
-
-                        <CardFooter className="flex justify-between">
-                            <Link href={route('applications.index')}>
-                                <Button 
-                                    variant="outline" 
-                                    type="button"
+                <form onSubmit={handleSubmit}>
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="company_name"
+                                    className="flex items-center gap-2"
                                 >
-                                    Cancel
-                                </Button>
-                            </Link>
-                            <CustomButton 
-                                type="submit"
-                                disabled={isSubmitting || form.formState.isSubmitting}
-                                className="px-6"
+                                    <Building2 className="h-4 w-4" />
+                                    Company Name
+                                </Label>
+                                <Input
+                                    id="company_name"
+                                    name="company_name"
+                                    placeholder="Enter company name"
+                                    value={data.company_name}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="position_title"
+                                    className="flex items-center gap-2"
+                                >
+                                    <Briefcase className="h-4 w-4" />
+                                    Position Title
+                                </Label>
+                                <Input
+                                    id="position_title"
+                                    name="position_title"
+                                    placeholder="Enter job title"
+                                    value={data.position_title}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="location"
+                                    className="flex items-center gap-2"
+                                >
+                                    <MapPin className="h-4 w-4" />
+                                    Location
+                                </Label>
+                                <Input
+                                    id="location"
+                                    name="location"
+                                    placeholder="City, State or Remote"
+                                    value={data.location}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="applied_at"
+                                    className="flex items-center gap-2"
+                                >
+                                    <Calendar className="h-4 w-4" />
+                                    Applied Date *
+                                </Label>
+                                <CustomDatePicker
+                                    id="applied_at"
+                                    name="applied_at"
+                                    value={application.applied_at}
+                                    onChange={(date) =>
+                                        setData("applied_at", date)
+                                    }
+                                    required
+                                />
+                                {/* {errors.applied_at && <p className="text-sm text-red-500">{errors.applied_at}</p>} */}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="job_url"
+                                    className="flex items-center gap-2"
+                                >
+                                    <ExternalLink className="h-4 w-4" />
+                                    Job URL
+                                </Label>
+                                <Input
+                                    id="job_url"
+                                    name="job_url"
+                                    type="url"
+                                    placeholder="https://example.com/job"
+                                    value={data.job_url}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="status"
+                                    className="flex items-center gap-2"
+                                >
+                                    <FileText className="h-4 w-4" />
+                                    Application Status
+                                </Label>
+                                <Select
+                                    value={data.status}
+                                    onValueChange={handleStatusChange}
+                                >
+                                    <SelectTrigger id="status">
+                                        <SelectValue placeholder="Select status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="applied">
+                                            Applied
+                                        </SelectItem>
+                                        <SelectItem value="interview">
+                                            Interview
+                                        </SelectItem>
+                                        <SelectItem value="offer">
+                                            Offer
+                                        </SelectItem>
+                                        <SelectItem value="rejected">
+                                            Rejected
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label
+                                htmlFor="resume_file"
+                                className="flex items-center gap-2"
                             >
-                                {isSubmitting ? "Saving..." : "Update Application"}
-                            </CustomButton>
-                        </CardFooter>
-                    </form>
-                </Form>
+                                <Upload className="h-4 w-4" />
+                                Resume Upload{" "}
+                                {application.resume_path &&
+                                    "(Leave empty to keep current resume)"}
+                            </Label>
+                            <Input
+                                id="resume_file"
+                                name="resume_file"
+                                type="file"
+                                accept=".pdf,.doc,.docx"
+                                onChange={handleFileChange}
+                                className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                Upload your resume (PDF, DOC, DOCX)
+                            </p>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label
+                                htmlFor="cover_letter"
+                                className="flex items-center gap-2"
+                            >
+                                <User className="h-4 w-4" />
+                                Cover Letter
+                            </Label>
+                            <Textarea
+                                id="cover_letter"
+                                name="cover_letter"
+                                placeholder="Enter your cover letter content"
+                                value={data.cover_letter}
+                                onChange={handleChange}
+                                rows={4}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label
+                                htmlFor="notes"
+                                className="flex items-center gap-2"
+                            >
+                                <FileText className="h-4 w-4" />
+                                Notes
+                            </Label>
+                            <Textarea
+                                id="notes"
+                                name="notes"
+                                placeholder="Add any additional notes about this job application"
+                                value={data.notes}
+                                onChange={handleChange}
+                                rows={3}
+                            />
+                        </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-between">
+                        <Button variant="outline" type="button" asChild>
+                            <Link
+                                href={route(
+                                    "applications.show",
+                                    application.id
+                                )}
+                            >
+                                Cancel
+                            </Link>
+                        </Button>
+                        <Button type="submit">Update Job Application</Button>
+                    </CardFooter>
+                </form>
             </Card>
-        </div>
+        </>
     );
 };
 
-JobApplicationEdit.layout = (page) => (
-    <DashboardLayout>{page}</DashboardLayout>
-);
+JobApplicationEdit.layout = (page) => <DashboardLayout>{page}</DashboardLayout>;
 
 export default JobApplicationEdit;

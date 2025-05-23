@@ -175,16 +175,25 @@ const JobApplicationCreate = () => {
                                 )}
                             </div>
                             <div className="space-y-2">
-  <Label htmlFor="applied_at" className="flex items-center gap-2">
-    <Calendar className="h-4 w-4" />
-    Applied Date *
-  </Label>
-  <CustomDatePicker 
-    value={data.applied_at}
-    onChange={(date) => setData("applied_at", date)}
-  />
-  {errors.applied_at && <p className="text-sm text-red-500">{errors.applied_at}</p>}
-</div>
+                                <Label
+                                    htmlFor="applied_at"
+                                    className="flex items-center gap-2"
+                                >
+                                    <Calendar className="h-4 w-4" />
+                                    Applied Date *
+                                </Label>
+                                <CustomDatePicker
+                                    value={data.applied_at}
+                                    onChange={(date) =>
+                                        setData("applied_at", date)
+                                    }
+                                />
+                                {errors.applied_at && (
+                                    <p className="text-sm text-red-500">
+                                        {errors.applied_at}
+                                    </p>
+                                )}
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
