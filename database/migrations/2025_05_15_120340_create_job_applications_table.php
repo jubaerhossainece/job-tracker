@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('company_name');
             $table->string('position_title');
             $table->enum('status', ['applied', 'interview', 'offer', 'rejected']);
-            $table->dateTime('applied_at');
+            $table->date('applied_at');
             $table->string('job_url')->nullable();
             $table->string('location');
             $table->text('notes')->nullable();

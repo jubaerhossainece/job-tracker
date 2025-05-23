@@ -1,3 +1,5 @@
+import React, { useState } from "react";
+import { useForm, Link } from "@inertiajs/react";
 import DashboardLayout from "@/Layouts/DashboardLayout";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -12,66 +14,58 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { DatePicker } from "@/components/ui/date-picker";
+import { CustomButton } from "@/components/ui/custom-button"; // Keeping your custom button
+import { DatePicker } from "@/components/ui/date-picker"; // Keeping your custom date picker
+import { Textarea } from "@/components/ui/textarea";
 import {
-  Select, SelectContent, SelectGroup, SelectItem,
-  SelectTrigger, SelectValue
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select";
+import { FileInput } from "@/components/ui/FileInput"; // Keeping your custom file input
 import { Label } from "@/components/ui/label";
-import { Link } from "@inertiajs/react";
-
-// Utility to format Date to YYYY-MM-DD
-const formatDate = (date) => {
-  if (!date) return "";
-  return new Date(date).toISOString().split("T")[0];
-};
+import { CalendarDays, Building2, BriefcaseBusiness, MapPin, Link2, FileText, FileEdit } from 'lucide-react';
 
 const JobApplicationCreate = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const today = formatDate(new Date());
-
-  const form = useForm({
-    defaultValues: {
-      company_name: "",
-      position_title: "",
-      status: "applied",
-      applied_at: today,
-      job_url: "",
-      location: "",
-      notes: "",
-      resume: null,
-      cover_letter: null,
-    },
-  });
-
-  const { handleSubmit, setValue, register, reset, formState: { errors } } = form;
-
-  const onSubmit = async (values) => {
-    setIsSubmitting(true);
-    const formData = new FormData();
-
-    Object.entries(values).forEach(([key, value]) => {
-      if (value instanceof File || key === "resume" || key === "cover_letter") {
-        if (value) formData.append(key, value);
-      } else {
-        formData.append(key, value ?? "");
-      }
+    // Format today's date as YYYY-MM-DD
+    const formatDateToYMD = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+    
+    const today = formatDateToYMD(new Date());
+    
+    // Use only Inertia form - this was the main issue, not the custom components
+    const { data, setData, post, processing, errors, reset } = useForm({
+        company_name: "",
+        position_title: "",
+        status: "applied",
+        applied_at: today,
+        job_url: "",
+        location: "",
+        notes: "",
+        resume: null,
+        cover_letter: "",
     });
 
-    router.post(route("applications.store"), formData, {
-      forceFormData: true,
-      onSuccess: () => {
-        if (window.Toast) window.Toast.success("Job application created successfully!");
-        reset();
-      },
-      onError: (errors) => {
-        if (window.Toast) window.Toast.error("Please fix the errors in the form.");
-      },
-      onFinish: () => setIsSubmitting(false),
-      preserveScroll: true,
-    });
-  };
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        
+        // Use Inertia's post method with file upload support
+        post(route('applications.store'), {
+            forceFormData: true, // This ensures multipart/form-data for file uploads
+            onSuccess: () => {
+                reset();
+            },
+            onError: (errors) => {
+                console.error('Form submission errors:', errors);
+            }
+        });
+    };
 
   return (
     <div className="py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -90,161 +84,203 @@ const JobApplicationCreate = () => {
         </div>
       </div>
 
-      {/* Form */}
-      <Card className="max-w-4xl mx-auto shadow-sm">
-        <CardHeader className="border-b bg-gray-50/50">
-          <CardTitle className="text-xl">Job Application Details</CardTitle>
-          <CardDescription className="text-gray-600">
-            Fields marked with * are required.
-          </CardDescription>
-        </CardHeader>
+            <Card className="max-w-4xl mx-auto">
+                <CardHeader>
+                    <CardTitle>Job Application Details</CardTitle>
+                    <CardDescription>
+                        Enter the details for your new job application. Fields marked with * are required.
+                    </CardDescription>
+                </CardHeader>
+                
+                <form onSubmit={handleSubmit}>
+                    <CardContent className="space-y-6">
+                        {/* Company and Position Section */}
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <Label className="flex items-center gap-2">
+                                    <Building2 size={16} />
+                                    Company Name *
+                                </Label>
+                                <Input
+                                    placeholder="Enter company name"
+                                    value={data.company_name}
+                                    onChange={(e) => setData('company_name', e.target.value)}
+                                    required
+                                />
+                                {errors.company_name && (
+                                    <p className="text-sm text-red-500">{errors.company_name}</p>
+                                )}
+                            </div>
 
-        <Form {...form}>
-          <form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Left column */}
-              <div className="space-y-6">
-                <FormField
-                  name="company_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Company *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Google" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                            <div className="space-y-2">
+                                <Label className="flex items-center gap-2">
+                                    <BriefcaseBusiness size={16} />
+                                    Position Title *
+                                </Label>
+                                <Input
+                                    placeholder="Enter position title"
+                                    value={data.position_title}
+                                    onChange={(e) => setData('position_title', e.target.value)}
+                                    required
+                                />
+                                {errors.position_title && (
+                                    <p className="text-sm text-red-500">{errors.position_title}</p>
+                                )}
+                            </div>
+                        </div>
 
-                <FormField
-                  name="position_title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Position Title *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Backend Engineer" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        {/* Status and Date Section */}
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <Label>Application Status *</Label>
+                                <Select
+                                    value={data.status}
+                                    onValueChange={(value) => setData('status', value)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="applied">Applied</SelectItem>
+                                        <SelectItem value="interview">Interview</SelectItem>
+                                        <SelectItem value="offer">Offer</SelectItem>
+                                        <SelectItem value="rejected">Rejected</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                {errors.status && (
+                                    <p className="text-sm text-red-500">{errors.status}</p>
+                                )}
+                            </div>
 
-                <FormField
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status *</FormLabel>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectItem value="applied">Applied</SelectItem>
-                            <SelectItem value="interviewing">Interviewing</SelectItem>
-                            <SelectItem value="offer">Offer</SelectItem>
-                            <SelectItem value="rejected">Rejected</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                            <div className="space-y-2">
+                                <Label className="flex items-center gap-2">
+                                    <CalendarDays size={16} />
+                                    Date Applied *
+                                </Label>
+                                {/* Using your custom DatePicker */}
+                                <DatePicker
+                                    value={data.applied_at ? new Date(data.applied_at) : new Date()}
+                                    onChange={(date) => {
+                                        if (date instanceof Date && !isNaN(date)) {
+                                            const formattedDate = formatDateToYMD(date);
+                                            setData('applied_at', formattedDate);
+                                        }
+                                    }}
+                                />
+                                {errors.applied_at && (
+                                    <p className="text-sm text-red-500">{errors.applied_at}</p>
+                                )}
+                            </div>
+                        </div>
 
-                <FormField
-                  name="applied_at"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Applied Date</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+                        {/* Location and URL Section */}
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <Label className="flex items-center gap-2">
+                                    <MapPin size={16} />
+                                    Location *
+                                </Label>
+                                <Input
+                                    placeholder="City, State or Remote"
+                                    value={data.location}
+                                    onChange={(e) => setData('location', e.target.value)}
+                                    required
+                                />
+                                {errors.location && (
+                                    <p className="text-sm text-red-500">{errors.location}</p>
+                                )}
+                            </div>
 
-              {/* Right column */}
-              <div className="space-y-6">
-                <FormField
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Location</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Remote or Berlin" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                            <div className="space-y-2">
+                                <Label className="flex items-center gap-2">
+                                    <Link2 size={16} />
+                                    Job URL
+                                </Label>
+                                <Input
+                                    type="url"
+                                    placeholder="https://example.com/job-posting"
+                                    value={data.job_url}
+                                    onChange={(e) => setData('job_url', e.target.value)}
+                                />
+                                {errors.job_url && (
+                                    <p className="text-sm text-red-500">{errors.job_url}</p>
+                                )}
+                            </div>
+                        </div>
 
-                <FormField
-                  name="job_url"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Job URL</FormLabel>
-                      <FormControl>
-                        <Input placeholder="https://example.com/job-posting" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        {/* Resume Section - Using your custom FileInput */}
+                        <div className="space-y-2">
+                            <Label className="flex items-center gap-2">
+                                <FileText size={16} />
+                                Resume
+                            </Label>
+                            <FileInput
+                                className="w-full"
+                                accept=".pdf,.doc,.docx"
+                                onChange={(e) => {
+                                    const file = e.target.files[0] || null;
+                                    setData('resume', file);
+                                }}
+                            />
+                            <p className="text-sm text-gray-500">Upload your resume (PDF, DOC, DOCX)</p>
+                            {errors.resume && (
+                                <p className="text-sm text-red-500">{errors.resume}</p>
+                            )}
+                        </div>
 
-                <FormItem>
-                  <FormLabel>Resume</FormLabel>
-                  <Input
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    onChange={(e) => setValue("resume", e.target.files[0])}
-                  />
-                </FormItem>
+                        {/* Cover Letter Section */}
+                        <div className="space-y-2">
+                            <Label className="flex items-center gap-2">
+                                <FileEdit size={16} />
+                                Cover Letter
+                            </Label>
+                            <Textarea
+                                placeholder="Enter your cover letter text here"
+                                className="min-h-[200px]"
+                                value={data.cover_letter}
+                                onChange={(e) => setData('cover_letter', e.target.value)}
+                            />
+                            {errors.cover_letter && (
+                                <p className="text-sm text-red-500">{errors.cover_letter}</p>
+                            )}
+                        </div>
 
-                <FormItem>
-                  <FormLabel>Cover Letter</FormLabel>
-                  <Input
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    onChange={(e) => setValue("cover_letter", e.target.files[0])}
-                  />
-                </FormItem>
-              </div>
-            </CardContent>
+                        {/* Notes Section */}
+                        <div className="space-y-2">
+                            <Label>Notes</Label>
+                            <Textarea
+                                placeholder="Additional notes about this application"
+                                value={data.notes}
+                                onChange={(e) => setData('notes', e.target.value)}
+                            />
+                            {errors.notes && (
+                                <p className="text-sm text-red-500">{errors.notes}</p>
+                            )}
+                        </div>
+                    </CardContent>
 
-            <CardContent>
-              <FormField
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Notes</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Add any extra details..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-
-            <CardFooter className="flex justify-end">
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : "Save Application"}
-              </Button>
-            </CardFooter>
-          </form>
-        </Form>
-      </Card>
-    </div>
-  );
+                    <CardFooter className="flex justify-between">
+                        <Link href={route('applications.index')}>
+                            <Button 
+                                variant="outline" 
+                                type="button"
+                            >
+                                Cancel
+                            </Button>
+                        </Link>
+                        {/* Using your CustomButton */}
+                        <CustomButton 
+                            type="submit"
+                            disabled={processing}
+                            className="px-6"
+                        >
+                            {processing ? "Saving..." : "Save Application"}
+                        </CustomButton>
+                    </CardFooter>
+                </form>
+            </Card>
+        </div>
+    );
 };
 
 JobApplicationCreate.layout = (page) => <DashboardLayout>{page}</DashboardLayout>;
