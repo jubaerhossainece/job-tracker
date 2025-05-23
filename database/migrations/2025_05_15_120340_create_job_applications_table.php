@@ -31,7 +31,6 @@ return new class extends Migration
             $table->string('contact_email')->nullable();
             $table->date('follow_up_date')->nullable();
             $table->integer('priority')->default(1); // 1-5 priority scale
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // If multi-user
             $table->timestamps();
         });
     }

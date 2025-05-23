@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\JobApplicationController;
+use App\Http\Controllers\JobEventController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserSettingsController;
@@ -45,6 +46,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/applications/{jobApplication}/edit', [JobApplicationController::class, 'edit'])->name('applications.edit');
     Route::put('/applications/{jobApplication}', [JobApplicationController::class, 'update'])->name('applications.update');
     Route::delete('/applications/{jobApplication}', [JobApplicationController::class, 'destroy'])->name('applications.destroy');
+    Route::get('/applications/{application}/resume/download', [JobApplicationController::class, 'downloadResume'])
+        ->name('applications.resume.download');
+
+    // Job Events
+    Route::resource('applications.events', JobEventController::class)->shallow();
+
+    // Profile
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/settings', [SettingController::class, 'index']);
 
