@@ -30,7 +30,7 @@ class JobApplicationController extends Controller
 
         // Make a copy of the validated array
         $data = $validated;
-        
+        $validated['user_id'] = auth()->id();
         // Handle file storage separately
         if ($request->hasFile('resume')) {
             $resume = $request->file('resume');
