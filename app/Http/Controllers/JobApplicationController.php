@@ -25,6 +25,12 @@ class JobApplicationController extends Controller
     public function store(Request $request)
     {
         try {
+            // Debug the incoming request data
+            \Log::info('Job Application Create Request Data:', $request->all());
+            \Log::info('Request has file resume: ' . ($request->hasFile('resume') ? 'Yes' : 'No'));
+            \Log::info('Request input keys: ' . implode(', ', array_keys($request->all())));
+            
+            // Use separate validation for required fields vs files for better error messages
             $validated = $request->validate([
                 'company_name' => 'required|string',
                 'position_title' => 'required|string',
@@ -37,36 +43,56 @@ class JobApplicationController extends Controller
                 'cover_letter' => 'nullable|string',
             ]);
     
+            // Log the validated data
+            \Log::info('Job Application Validated Data:', $validated);
+            
             // Make a copy of the validated array
             $data = $validated;
             
-            // Ensure applied_at is properly formatted
+            // Ensure applied_at is properly formatted as a date (YYYY-MM-DD)
             if (isset($data['applied_at'])) {
-                $data['applied_at'] = date('Y-m-d', strtotime($data['applied_at']));
+                // Parse the date in a format-agnostic way
+                $timestamp = strtotime($data['applied_at']);
+                if ($timestamp === false) {
+                    throw new \Exception('Invalid date format for applied_at');
+                }
+                $data['applied_at'] = date('Y-m-d', $timestamp);
+                \Log::info('Formatted applied_at date: ' . $data['applied_at']);
             }
             
             // Handle file storage separately
             if ($request->hasFile('resume')) {
                 $resume = $request->file('resume');
                 $data['resume_path'] = $resume->store('resumes', 'public');
+                \Log::info('Resume uploaded to: ' . $data['resume_path']);
             }
             
             // Remove resume from data array as it's not a database field
             if (isset($data['resume'])) {
                 unset($data['resume']);
             }
+            
+            // Log final data before creating the record
+            \Log::info('Final Job Application Data for Creation:', $data);
     
             $job = JobApplication::create($data);
+            \Log::info('Job Application Created with ID: ' . $job->id);
     
             return redirect()->route('applications.index')
                 ->with('success', 'Job application created successfully!');
         } catch (\Exception $e) {
-            // Log the error for debugging
+            // Log the detailed error for debugging
             \Log::error('Job application creation error: ' . $e->getMessage());
+            \Log::error('Error trace: ' . $e->getTraceAsString());
             
+            // Return error with the actual message in development
+            $errorMessage = config('app.debug') 
+                ? 'Error: ' . $e->getMessage() 
+                : 'There was a problem creating your job application. Please try again.';
+                
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['error' => 'There was a problem creating your job application. Please try again.']);
+                ->withErrors(['error' => $errorMessage]);
         }
     }
     

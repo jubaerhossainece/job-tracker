@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { useForm as useInertiaForm, Link } from "@inertiajs/react";
-import { useForm as useReactHookForm } from "react-hook-form";
+import { useForm, Link } from "@inertiajs/react";
 import DashboardLayout from "@/Layouts/DashboardLayout";
 import { 
     Card,
@@ -12,112 +11,56 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { CustomButton } from "@/components/ui/custom-button";
-import { DatePicker } from "@/components/ui/date-picker";
+import { CustomButton } from "@/components/ui/custom-button"; // Keeping your custom button
+import { DatePicker } from "@/components/ui/date-picker"; // Keeping your custom date picker
 import { Textarea } from "@/components/ui/textarea";
 import {
     Select,
     SelectContent,
-    SelectGroup,
     SelectItem,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { 
-    Form, 
-    FormControl, 
-    FormField, 
-    FormItem, 
-    FormLabel, 
-    FormMessage 
-} from "@/components/ui/form";
-import { FileInput } from "@/components/ui/FileInput";
-import { CalendarDays, Building2, BriefcaseBusiness, MapPin, Link2, FileText, FileEdit } from "lucide-react";
+import { FileInput } from "@/components/ui/FileInput"; // Keeping your custom file input
+import { Label } from "@/components/ui/label";
+import { CalendarDays, Building2, BriefcaseBusiness, MapPin, Link2, FileText, FileEdit } from 'lucide-react';
 
 const JobApplicationCreate = () => {
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    // Format today's date as YYYY-MM-DD
+    const formatDateToYMD = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
     
-    // Separate the form for react-hook-form and Inertia form handling
-    const inertiaForm = useInertiaForm({
+    const today = formatDateToYMD(new Date());
+    
+    // Use only Inertia form - this was the main issue, not the custom components
+    const { data, setData, post, processing, errors, reset } = useForm({
         company_name: "",
         position_title: "",
         status: "applied",
-        applied_at: new Date().toISOString().substr(0, 10), // Current date in YYYY-MM-DD format
+        applied_at: today,
         job_url: "",
         location: "",
         notes: "",
         resume: null,
         cover_letter: "",
     });
-    
-    // Create separate form for react-hook-form (shadcn/ui forms)
-    const form = useReactHookForm({
-        defaultValues: {
-            company_name: "",
-            position_title: "",
-            status: "applied",
-            applied_at: new Date().toISOString().substr(0, 10),
-            job_url: "",
-            location: "",
-            notes: "",
-            resume: null,
-            cover_letter: "",
-        }
-    });
 
-    const handleSubmit = (values) => {
-        // Prevent double submission
-        if (isSubmitting) {
-            return;
-        }
+    const handleSubmit = (e) => {
+        e.preventDefault();
         
-        // Set submitting state immediately
-        setIsSubmitting(true);
-        
-        // Create FormData for file uploads
-        const formData = new FormData();
-        
-        // Process and add all values to formData
-        for (const key in values) {
-            // Special handling for date field
-            if (key === 'applied_at' && values[key]) {
-                const dateValue = values[key] instanceof Date 
-                    ? values[key].toISOString().split('T')[0] // Format as YYYY-MM-DD
-                    : values[key];
-                formData.append(key, dateValue);
-                inertiaForm.setData(key, dateValue);
-            }
-            // Special handling for files
-            else if (key === 'resume' && values[key] instanceof File) {
-                formData.append(key, values[key]);
-                inertiaForm.setData(key, values[key]);
-            } 
-            // Handle other data types
-            else if (values[key] !== null && values[key] !== undefined) {
-                formData.append(key, values[key]);
-                inertiaForm.setData(key, values[key]);
-            }
-        }
-        
-        // Submit the form with FormData
-        inertiaForm.post(route('applications.store'), formData, {
-            forceFormData: true, // Important for file uploads
+        // Use Inertia's post method with file upload support
+        post(route('applications.store'), {
+            forceFormData: true, // This ensures multipart/form-data for file uploads
             onSuccess: () => {
-                form.reset();
-                // You could add a success message here
+                reset();
             },
             onError: (errors) => {
                 console.error('Form submission errors:', errors);
-                // Scroll to the first error if any
-                const firstErrorField = Object.keys(errors)[0];
-                if (firstErrorField) {
-                    document.querySelector(`[name="${firstErrorField}"]`)?.focus();
-                }
-            },
-            onFinish: () => {
-                setIsSubmitting(false);
-            },
-            preserveScroll: true,
+            }
         });
     };
 
@@ -140,261 +83,192 @@ const JobApplicationCreate = () => {
                     </CardDescription>
                 </CardHeader>
                 
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit((data) => handleSubmit(data))}>
-                        <CardContent className="space-y-6">
-                            {/* Company and Position Section */}
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <FormField
-                                    control={form.control}
-                                    name="company_name"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="flex items-center gap-2">
-                                                <Building2 size={16} />
-                                                Company Name *
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="Enter company name"
-                                                    {...field}
-                                                    required
-                                                />
-                                            </FormControl>
-                                            {inertiaForm.errors.company_name && (
-                                                <FormMessage>{inertiaForm.errors.company_name}</FormMessage>
-                                            )}
-                                        </FormItem>
-                                    )}
+                <form onSubmit={handleSubmit}>
+                    <CardContent className="space-y-6">
+                        {/* Company and Position Section */}
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <Label className="flex items-center gap-2">
+                                    <Building2 size={16} />
+                                    Company Name *
+                                </Label>
+                                <Input
+                                    placeholder="Enter company name"
+                                    value={data.company_name}
+                                    onChange={(e) => setData('company_name', e.target.value)}
+                                    required
                                 />
-
-                                <FormField
-                                    control={form.control}
-                                    name="position_title"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="flex items-center gap-2">
-                                                <BriefcaseBusiness size={16} />
-                                                Position Title *
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="Enter position title"
-                                                    {...field}
-                                                    required
-                                                />
-                                            </FormControl>
-                                            {inertiaForm.errors.position_title && (
-                                                <FormMessage>{inertiaForm.errors.position_title}</FormMessage>
-                                            )}
-                                        </FormItem>
-                                    )}
-                                />
+                                {errors.company_name && (
+                                    <p className="text-sm text-red-500">{errors.company_name}</p>
+                                )}
                             </div>
 
-                            {/* Status and Date Section */}
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <FormField
-                                    control={form.control}
-                                    name="status"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Application Status *</FormLabel>
-                                            <Select
-                                                value={field.value}
-                                                onValueChange={field.onChange}
-                                            >
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select status" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectGroup>
-                                                        <SelectItem value="applied">Applied</SelectItem>
-                                                        <SelectItem value="interview">Interview</SelectItem>
-                                                        <SelectItem value="offer">Offer</SelectItem>
-                                                        <SelectItem value="rejected">Rejected</SelectItem>
-                                                    </SelectGroup>
-                                                </SelectContent>
-                                            </Select>
-                                            {inertiaForm.errors.status && (
-                                                <FormMessage>{inertiaForm.errors.status}</FormMessage>
-                                            )}
-                                        </FormItem>
-                                    )}
+                            <div className="space-y-2">
+                                <Label className="flex items-center gap-2">
+                                    <BriefcaseBusiness size={16} />
+                                    Position Title *
+                                </Label>
+                                <Input
+                                    placeholder="Enter position title"
+                                    value={data.position_title}
+                                    onChange={(e) => setData('position_title', e.target.value)}
+                                    required
                                 />
-
-                                <FormField
-                                    control={form.control}
-                                    name="applied_at"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="flex items-center gap-2">
-                                                <CalendarDays size={16} />
-                                                Date Applied *
-                                            </FormLabel>
-                                            <FormControl>
-                                                <DatePicker
-                                                    value={field.value ? new Date(field.value) : new Date()}
-                                                    onChange={(date) => {
-                                                        // Store as ISO string format (YYYY-MM-DD)
-                                                        const formattedDate = date instanceof Date 
-                                                            ? date.toISOString().split('T')[0]
-                                                            : date;
-                                                        field.onChange(formattedDate);
-                                                    }}
-                                                />
-                                            </FormControl>
-                                            {inertiaForm.errors.applied_at && (
-                                                <FormMessage>{inertiaForm.errors.applied_at}</FormMessage>
-                                            )}
-                                        </FormItem>
-                                    )}
-                                />
+                                {errors.position_title && (
+                                    <p className="text-sm text-red-500">{errors.position_title}</p>
+                                )}
                             </div>
+                        </div>
 
-                            {/* Location and URL Section */}
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <FormField
-                                    control={form.control}
-                                    name="location"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="flex items-center gap-2">
-                                                <MapPin size={16} />
-                                                Location *
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="City, State or Remote"
-                                                    {...field}
-                                                    required
-                                                />
-                                            </FormControl>
-                                            {inertiaForm.errors.location && (
-                                                <FormMessage>{inertiaForm.errors.location}</FormMessage>
-                                            )}
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="job_url"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="flex items-center gap-2">
-                                                <Link2 size={16} />
-                                                Job URL
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="url"
-                                                    placeholder="https://example.com/job-posting"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            {inertiaForm.errors.job_url && (
-                                                <FormMessage>{inertiaForm.errors.job_url}</FormMessage>
-                                            )}
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-
-                            {/* Resume Section */}
-                            <FormField
-                                control={form.control}
-                                name="resume"
-                                render={({ field: { value, onChange, ...fieldProps } }) => (
-                                    <FormItem>
-                                        <FormLabel className="flex items-center gap-2">
-                                            <FileText size={16} />
-                                            Resume
-                                        </FormLabel>
-                                        <FormControl>
-                                            <FileInput
-                                                className="w-full"
-                                                {...fieldProps}
-                                                onChange={(e) => {
-                                                    const file = e.target.files[0] || null;
-                                                    onChange(file);
-                                                }}
-                                            />
-                                        </FormControl>
-                                        <p className="text-sm text-gray-500">Upload your resume (PDF, DOC, DOCX)</p>
-                                        {inertiaForm.errors.resume && (
-                                            <FormMessage>{inertiaForm.errors.resume}</FormMessage>
-                                        )}
-                                    </FormItem>
-                                )}
-                            />
-
-                            {/* Cover Letter Section */}
-                            <FormField
-                                control={form.control}
-                                name="cover_letter"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="flex items-center gap-2">
-                                            <FileEdit size={16} />
-                                            Cover Letter
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Textarea
-                                                placeholder="Enter your cover letter text here"
-                                                className="min-h-[200px]"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        {inertiaForm.errors.cover_letter && (
-                                            <FormMessage>{inertiaForm.errors.cover_letter}</FormMessage>
-                                        )}
-                                    </FormItem>
-                                )}
-                            />
-
-                            {/* Notes Section */}
-                            <FormField
-                                control={form.control}
-                                name="notes"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Notes</FormLabel>
-                                        <FormControl>
-                                            <Textarea
-                                                placeholder="Additional notes about this application"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        {inertiaForm.errors.notes && (
-                                            <FormMessage>{inertiaForm.errors.notes}</FormMessage>
-                                        )}
-                                    </FormItem>
-                                )}
-                            />
-                        </CardContent>
-
-                        <CardFooter className="flex justify-between">
-                            <Link href={route('applications.index')}>
-                                <Button 
-                                    variant="outline" 
-                                    type="button"
+                        {/* Status and Date Section */}
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <Label>Application Status *</Label>
+                                <Select
+                                    value={data.status}
+                                    onValueChange={(value) => setData('status', value)}
                                 >
-                                    Cancel
-                                </Button>
-                            </Link>
-                            <CustomButton 
-                                type="submit"
-                                disabled={isSubmitting || form.formState.isSubmitting}
-                                className="px-6"
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="applied">Applied</SelectItem>
+                                        <SelectItem value="interview">Interview</SelectItem>
+                                        <SelectItem value="offer">Offer</SelectItem>
+                                        <SelectItem value="rejected">Rejected</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                {errors.status && (
+                                    <p className="text-sm text-red-500">{errors.status}</p>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="flex items-center gap-2">
+                                    <CalendarDays size={16} />
+                                    Date Applied *
+                                </Label>
+                                {/* Using your custom DatePicker */}
+                                <DatePicker
+                                    value={data.applied_at ? new Date(data.applied_at) : new Date()}
+                                    onChange={(date) => {
+                                        if (date instanceof Date && !isNaN(date)) {
+                                            const formattedDate = formatDateToYMD(date);
+                                            setData('applied_at', formattedDate);
+                                        }
+                                    }}
+                                />
+                                {errors.applied_at && (
+                                    <p className="text-sm text-red-500">{errors.applied_at}</p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Location and URL Section */}
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <Label className="flex items-center gap-2">
+                                    <MapPin size={16} />
+                                    Location *
+                                </Label>
+                                <Input
+                                    placeholder="City, State or Remote"
+                                    value={data.location}
+                                    onChange={(e) => setData('location', e.target.value)}
+                                    required
+                                />
+                                {errors.location && (
+                                    <p className="text-sm text-red-500">{errors.location}</p>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="flex items-center gap-2">
+                                    <Link2 size={16} />
+                                    Job URL
+                                </Label>
+                                <Input
+                                    type="url"
+                                    placeholder="https://example.com/job-posting"
+                                    value={data.job_url}
+                                    onChange={(e) => setData('job_url', e.target.value)}
+                                />
+                                {errors.job_url && (
+                                    <p className="text-sm text-red-500">{errors.job_url}</p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Resume Section - Using your custom FileInput */}
+                        <div className="space-y-2">
+                            <Label className="flex items-center gap-2">
+                                <FileText size={16} />
+                                Resume
+                            </Label>
+                            <FileInput
+                                className="w-full"
+                                accept=".pdf,.doc,.docx"
+                                onChange={(e) => {
+                                    const file = e.target.files[0] || null;
+                                    setData('resume', file);
+                                }}
+                            />
+                            <p className="text-sm text-gray-500">Upload your resume (PDF, DOC, DOCX)</p>
+                            {errors.resume && (
+                                <p className="text-sm text-red-500">{errors.resume}</p>
+                            )}
+                        </div>
+
+                        {/* Cover Letter Section */}
+                        <div className="space-y-2">
+                            <Label className="flex items-center gap-2">
+                                <FileEdit size={16} />
+                                Cover Letter
+                            </Label>
+                            <Textarea
+                                placeholder="Enter your cover letter text here"
+                                className="min-h-[200px]"
+                                value={data.cover_letter}
+                                onChange={(e) => setData('cover_letter', e.target.value)}
+                            />
+                            {errors.cover_letter && (
+                                <p className="text-sm text-red-500">{errors.cover_letter}</p>
+                            )}
+                        </div>
+
+                        {/* Notes Section */}
+                        <div className="space-y-2">
+                            <Label>Notes</Label>
+                            <Textarea
+                                placeholder="Additional notes about this application"
+                                value={data.notes}
+                                onChange={(e) => setData('notes', e.target.value)}
+                            />
+                            {errors.notes && (
+                                <p className="text-sm text-red-500">{errors.notes}</p>
+                            )}
+                        </div>
+                    </CardContent>
+
+                    <CardFooter className="flex justify-between">
+                        <Link href={route('applications.index')}>
+                            <Button 
+                                variant="outline" 
+                                type="button"
                             >
-                                {isSubmitting ? "Saving..." : "Save Application"}
-                            </CustomButton>
-                        </CardFooter>
-                    </form>
-                </Form>
+                                Cancel
+                            </Button>
+                        </Link>
+                        {/* Using your CustomButton */}
+                        <CustomButton 
+                            type="submit"
+                            disabled={processing}
+                            className="px-6"
+                        >
+                            {processing ? "Saving..." : "Save Application"}
+                        </CustomButton>
+                    </CardFooter>
+                </form>
             </Card>
         </div>
     );
