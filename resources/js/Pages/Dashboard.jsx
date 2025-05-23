@@ -3,8 +3,7 @@ import React from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { useState } from "react"
 import { useForm, Link } from "@inertiajs/react";
-
-import { PlusCircle, Search } from "lucide-react"
+import { PlusCircle, Search, Calendar, TrendingUp, Users, Clock, CheckCircle, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -12,204 +11,231 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import JobCard from "@/components/JobCard"
 import Pagination from "@/components/Pagination"
 
-function Dashboard() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [currentPage, setCurrentPage] = useState(1)
-  const jobsPerPage = 6
 
-  // Calculate statistics
-  const totalApplications = jobData.length
-  const interviewCount = jobData.filter((job) => job.status === "interview").length
-  const offerCount = jobData.filter((job) => job.status === "offer").length
-  const rejectionCount = jobData.filter((job) => job.status === "rejected").length
 
-  // Filter jobs based on search and status
-  const filteredJobs = jobData.filter((job) => {
-    const matchesSearch =
-      job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.position.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesStatus = statusFilter === "all" || job.status === statusFilter
 
-    return matchesSearch && matchesStatus
-  })
+// "use client"
 
-  // Pagination logic
-  const indexOfLastJob = currentPage * jobsPerPage
-  const indexOfFirstJob = indexOfLastJob - jobsPerPage
-  const currentJobs = filteredJobs.slice(indexOfFirstJob, indexOfLastJob)
-  const totalPages = Math.ceil(filteredJobs.length / jobsPerPage)
+// import { Link } from "@inertiajs/react"
+// import { PlusCircle, Search, Calendar, TrendingUp, Users, Clock } from "lucide-react"
+// import { Button } from "@/Components/ui/button"
+// import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card"
+// import JobCard from "@/Components/JobCard"
+// import DashboardLayout from "@/Layouts/DashboardLayout"
+// import { route } from "@/Helpers/route"
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber)
-  }
-
+const Dashboard = ({ recentApplications, stats, monthlyApplications, upcomingInterviews }) => {
   return (
-    <div className="flex min-h-screen w-full flex-col">
-      <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-        <div className="flex flex-1 items-center gap-2">
-          <h1 className="text-xl font-semibold">Job Tracker</h1>
+    <>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground">Welcome back! Here's your job search overview.</p>
         </div>
-        <div className="flex items-center gap-4">
-          <Link to="/jobs/new">
-            <Button size="sm">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Job
-            </Button>
-          </Link>
-        </div>
-      </header>
-      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                className="h-4 w-4 text-muted-foreground"
-              >
-                <path d="M12 21V12m0 0V3m0 9h9m-9 0H3" />
-              </svg>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalApplications}</div>
-              <p className="text-xs text-muted-foreground">Jobs you've applied to</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Interviews</CardTitle>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                className="h-4 w-4 text-muted-foreground"
-              >
-                <path d="M12 6v6l4 2" />
-                <circle cx="12" cy="12" r="10" />
-              </svg>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{interviewCount}</div>
-              <p className="text-xs text-muted-foreground">
-                {((interviewCount / totalApplications) * 100).toFixed(1)}% of applications
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Offers</CardTitle>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                className="h-4 w-4 text-muted-foreground"
-              >
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-              </svg>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{offerCount}</div>
-              <p className="text-xs text-muted-foreground">
-                {((offerCount / totalApplications) * 100).toFixed(1)}% of applications
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Rejections</CardTitle>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                className="h-4 w-4 text-muted-foreground"
-              >
-                <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
-                <path d="m15 9-6 6" />
-                <path d="m9 9 6 6" />
-              </svg>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{rejectionCount}</div>
-              <p className="text-xs text-muted-foreground">
-                {((rejectionCount / totalApplications) * 100).toFixed(1)}% of applications
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center">
-            <h2 className="flex-1 text-lg font-semibold md:text-xl">Job Applications</h2>
-          </div>
-          <div className="flex flex-col gap-4 sm:flex-row">
-            <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search jobs..."
-                className="pl-8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+        <Link href={route("applications.create")}>
+          <Button size="sm">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Job
+          </Button>
+        </Link>
+      </div>
+
+      {/* Statistics Cards with Colors */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+        {/* Total Applications - Blue Theme */}
+        <Card className="border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/50 dark:to-blue-900/30">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Applications</CardTitle>
+            <div className="p-2 bg-blue-500/10 rounded-full">
+              <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="applied">Applied</SelectItem>
-                <SelectItem value="interview">Interview</SelectItem>
-                <SelectItem value="offer">Offer</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">{stats.total}</div>
+            <p className="text-xs text-blue-600 dark:text-blue-400">Jobs you've applied to</p>
+          </CardContent>
+        </Card>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {currentJobs.length > 0 ? (
-              currentJobs.map((job) => <JobCard key={job.id} job={job} />)
-            ) : (
-              <div className="col-span-full flex h-[200px] flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-                  <Search className="h-10 w-10 text-primary" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold">No jobs found</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Try adjusting your search or filter to find what you're looking for.
-                </p>
+        {/* Interviews - Amber/Orange Theme */}
+        <Card className="border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/50 dark:to-amber-900/30">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-amber-700 dark:text-amber-300">Interviews</CardTitle>
+            <div className="p-2 bg-amber-500/10 rounded-full">
+              <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-amber-900 dark:text-amber-100">{stats.interview}</div>
+            <p className="text-xs text-amber-600 dark:text-amber-400">
+              {stats.total > 0 ? ((stats.interview / stats.total) * 100).toFixed(1) : 0}% of applications
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Offers - Green Theme */}
+        <Card className="border-l-4 border-l-green-500 bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/50 dark:to-green-900/30">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">Offers</CardTitle>
+            <div className="p-2 bg-green-500/10 rounded-full">
+              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-900 dark:text-green-100">{stats.offer}</div>
+            <p className="text-xs text-green-600 dark:text-green-400">
+              {stats.total > 0 ? ((stats.offer / stats.total) * 100).toFixed(1) : 0}% of applications
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Rejections - Red Theme */}
+        <Card className="border-l-4 border-l-red-500 bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-950/50 dark:to-red-900/30">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-red-700 dark:text-red-300">Rejections</CardTitle>
+            <div className="p-2 bg-red-500/10 rounded-full">
+              <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-900 dark:text-red-100">{stats.rejected}</div>
+            <p className="text-xs text-red-600 dark:text-red-400">
+              {stats.total > 0 ? ((stats.rejected / stats.total) * 100).toFixed(1) : 0}% of applications
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* Recent Applications */}
+        <div className="lg:col-span-2">
+          <Card className="border-t-4 border-t-slate-500">
+            <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100/50 dark:from-slate-900/50 dark:to-slate-800/30">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-slate-700 dark:text-slate-300">Recent Applications</CardTitle>
+                <Link href={route("applications.index")}>
+                  <Button variant="outline" size="sm" className="border-slate-300 text-slate-600 hover:bg-slate-100">
+                    View All
+                  </Button>
+                </Link>
               </div>
-            )}
-          </div>
-
-          {filteredJobs.length > jobsPerPage && (
-            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
-          )}
+            </CardHeader>
+            <CardContent className="pt-6">
+              {recentApplications && recentApplications.length > 0 ? (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {recentApplications.map((job) => (
+                    <JobCard key={job.id} job={job} />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex h-[200px] flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 p-8 text-center bg-slate-50/50 dark:bg-slate-900/50">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+                    <Search className="h-10 w-10 text-slate-500" />
+                  </div>
+                  <h3 className="mt-4 text-lg font-semibold text-slate-700 dark:text-slate-300">No applications yet</h3>
+                  <p className="mt-2 text-sm text-slate-500">Start by adding your first job application.</p>
+                  <Link href={route("applications.create")} className="mt-4">
+                    <Button size="sm" className="bg-slate-600 hover:bg-slate-700">
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Add Job Application
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
-      </main>
-    </div>
+
+        {/* Upcoming Interviews */}
+        <div>
+          <Card className="border-t-4 border-t-purple-500 bg-gradient-to-br from-purple-50 to-purple-100/30 dark:from-purple-950/30 dark:to-purple-900/20">
+            <CardHeader className="bg-gradient-to-r from-purple-100/50 to-purple-200/30 dark:from-purple-900/30 dark:to-purple-800/20">
+              <CardTitle className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
+                <div className="p-1 bg-purple-500/10 rounded-full">
+                  <Calendar className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                </div>
+                Upcoming Interviews
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              {upcomingInterviews && upcomingInterviews.length > 0 ? (
+                <div className="space-y-4">
+                  {upcomingInterviews.map((interview) => (
+                    <div
+                      key={interview.id}
+                      className="flex flex-col space-y-1 border-l-2 border-purple-400 pl-4 bg-white/50 dark:bg-purple-950/20 p-3 rounded-r-lg"
+                    >
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium text-purple-800 dark:text-purple-200">
+                          {interview.event_type}
+                        </p>
+                        <p className="text-xs text-purple-600 dark:text-purple-400">
+                          {new Date(interview.event_date).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <p className="text-sm text-purple-700 dark:text-purple-300 font-medium">
+                        {interview.company_name}
+                      </p>
+                      <p className="text-xs text-purple-600 dark:text-purple-400">{interview.position_title}</p>
+                      {interview.event_time && (
+                        <p className="text-xs text-purple-500 dark:text-purple-400">Time: {interview.event_time}</p>
+                      )}
+                      {interview.interviewer_name && (
+                        <p className="text-xs text-purple-500 dark:text-purple-400">
+                          Interviewer: {interview.interviewer_name}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-full w-fit mx-auto mb-2">
+                    <Calendar className="h-12 w-12 text-purple-500" />
+                  </div>
+                  <p className="text-sm text-purple-600 dark:text-purple-400">No upcoming interviews</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Application Trends Chart with Colors */}
+      {monthlyApplications && monthlyApplications.length > 0 && (
+        <div className="mt-6">
+          <Card className="border-t-4 border-t-indigo-500 bg-gradient-to-br from-indigo-50 to-indigo-100/30 dark:from-indigo-950/30 dark:to-indigo-900/20">
+            <CardHeader className="bg-gradient-to-r from-indigo-100/50 to-indigo-200/30 dark:from-indigo-900/30 dark:to-indigo-800/20">
+              <CardTitle className="text-indigo-700 dark:text-indigo-300 flex items-center gap-2">
+                <div className="p-1 bg-indigo-500/10 rounded-full">
+                  <TrendingUp className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                Application Trends
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="flex items-end space-x-2 h-32 bg-white/50 dark:bg-indigo-950/20 p-4 rounded-lg">
+                {monthlyApplications.map((month, index) => (
+                  <div key={index} className="flex flex-col items-center flex-1">
+                    <div
+                      className="bg-gradient-to-t from-indigo-500 to-indigo-400 rounded-t w-full min-h-[4px] shadow-sm"
+                      style={{
+                        height: `${Math.max((month.count / Math.max(...monthlyApplications.map((m) => m.count))) * 100, 4)}%`,
+                      }}
+                    />
+                    <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-2 text-center">{month.month}</p>
+                    <p className="text-xs font-medium text-indigo-800 dark:text-indigo-200">{month.count}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </>
   )
 }
 
-Dashboard.layout = (page) => (
-    <DashboardLayout>{page}</DashboardLayout>
-);
-export default Dashboard;
+
+Dashboard.layout = (page) => <DashboardLayout>{page}</DashboardLayout>
+
+export default Dashboard

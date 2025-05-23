@@ -57,7 +57,8 @@ class JobApplicationController extends Controller
     public function show(JobApplication $jobApplication)
     {
         return Inertia::render('JobApplications/Show', [
-            'application' => $jobApplication
+            'application' => $jobApplication,
+            'events' => $jobApplication->events()->latest()->get()
         ]);
     }
 
