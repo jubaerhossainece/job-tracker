@@ -1,16 +1,13 @@
 "use client"
-
-import { useState } from "react"
-import { Inertia } from "@inertiajs/inertia"
-import { Link } from "@inertiajs/inertia-react"
+import { useForm, Link } from "@inertiajs/react";
+import React, { useState } from "react";
 import { ArrowLeft, Calendar, FileText } from "lucide-react"
-import { Button } from "@/Components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/Components/ui/card"
-import { Input } from "@/Components/ui/input"
-import { Label } from "@/Components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/ui/select"
-import { Textarea } from "@/Components/ui/textarea"
-import { route } from "@/Helpers/route"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 import DashboardLayout from "@/Layouts/DashboardLayout"
 
 const EventCreate = ({ application }) => {
@@ -52,7 +49,7 @@ const EventCreate = ({ application }) => {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    Inertia.post(route("job-applications.events.store", jobApplication.id), values)
+    Inertia.post(route("applications.events.store", application.id), values)
   }
 
   const eventTypes = [
@@ -76,7 +73,7 @@ const EventCreate = ({ application }) => {
     <>
       <div className="mb-6 flex items-center">
         <Button variant="ghost" size="icon" asChild className="mr-2">
-          <Link href={route("job-applications.show", jobApplication.id)}>
+          <Link href={route("applications.show", application.id)}>
             <ArrowLeft className="h-4 w-4" />
             <span className="sr-only">Back</span>
           </Link>
@@ -198,7 +195,7 @@ const EventCreate = ({ application }) => {
           </CardContent>
           <CardFooter className="flex justify-between">
             <Button variant="outline" type="button" asChild>
-              <Link href={route("job-applications.show", jobApplication.id)}>Cancel</Link>
+              <Link href={route("applications.show", application.id)}>Cancel</Link>
             </Button>
             <Button type="submit">Save Event</Button>
           </CardFooter>

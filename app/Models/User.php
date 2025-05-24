@@ -54,8 +54,8 @@ class User extends Authenticatable
         return $this->hasOne(UserNotification::class);
     }
 
-    public function security()
+    public function privacies()
     {
-        return $this->hasOne(UserSecuritySetting::class);
+        return $this->hasOne(UserPrivacy::class);
     }
 }
