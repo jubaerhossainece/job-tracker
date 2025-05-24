@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Events\StoreJobEventRequest;
 use App\Models\JobApplication;
 use App\Models\JobEvent;
 use Illuminate\Http\Request;
@@ -15,26 +16,16 @@ class JobEventController extends Controller
     public function create(JobApplication $application)
     {
         return Inertia::render('JobApplications/Events/Create', [
-            'jobApplication' => $application
+            'application' => $application
         ]);
     }
 
     /**
      * Store a newly created event in storage.
      */
-    public function store(Request $request, JobApplication $application)
+    public function store(StoreJobEventRequest $request, JobApplication $application)
     {
-        $validated = $request->validate([
-            'event_type' => 'required|string',
-            'title' => 'required|string|max:255',
-            'event_date' => 'required|date',
-            'event_time' => 'nullable|date_format:H:i',
-            'notes' => 'nullable|string',
-            'interviewer_name' => 'nullable|string|max:255',
-            'interviewer_email' => 'nullable|email|max:255',
-            'location' => 'nullable|string|max:255',
-            'meeting_link' => 'nullable|url|max:255',
-        ]);
+        $validated = $request->validated();
 
         // Create the event
         $event = $application->events()->create($validated);
