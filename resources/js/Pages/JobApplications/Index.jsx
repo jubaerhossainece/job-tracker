@@ -168,13 +168,13 @@ const JobApplicationsIndex = ({ jobApplications, stats }) => {
             <Input
               type="search"
               placeholder="Search jobs..."
-              className="pl-8"
+              className="pl-8  bg-white"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectTrigger className="w-full  bg-white sm:w-[180px]">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
