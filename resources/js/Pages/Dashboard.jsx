@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import JobCard from "@/components/JobCard"
 import Pagination from "@/components/Pagination"
+import { CustomButton } from '@/components/ui/custom-button';
 
 
 
@@ -33,10 +34,10 @@ const Dashboard = ({ recentApplications, stats, monthlyApplications, upcomingInt
           <p className="text-muted-foreground">Welcome back! Here's your job search overview.</p>
         </div>
         <Link href={route("applications.create")}>
-          <Button size="sm">
+          <CustomButton size="sm">
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Job
-          </Button>
+          </CustomButton>
         </Link>
       </div>
 

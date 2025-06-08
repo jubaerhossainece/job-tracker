@@ -5,9 +5,9 @@ import path from "path";
 
 export default defineConfig({
     server: {
-        host: "127.0.0.1",
+        host: true,
         port: 5173,
-        origin: "http://127.0.0.1:5173",
+        // origin: "http://127.0.0.1:5173",
         cors: {
             origin: ["http://job-tracker.local"],
             credentials: true,

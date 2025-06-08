@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import DashboardLayout from "@/Layouts/DashboardLayout";
+import { CustomButton } from "@/components/ui/custom-button";
 
 const JobApplicationCreate = () => {
     // Format today's date as YYYY-MM-DD
@@ -346,9 +347,9 @@ const JobApplicationCreate = () => {
                                 Cancel
                             </Link>
                         </Button>
-                        <Button type="submit" disabled={processing}>
+                        <CustomButton type="submit" disabled={processing}>
                             {processing ? "Saving..." : "Save Job Application"}
-                        </Button>
+                        </CustomButton>
                     </CardFooter>
                 </form>
             </Card>

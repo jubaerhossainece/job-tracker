@@ -41,6 +41,7 @@ import {
     User,
     Upload,
 } from "lucide-react";
+import { CustomButton } from "@/components/ui/custom-button";
 
 const JobApplicationEdit = ({ application }) => {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -304,7 +305,7 @@ const JobApplicationEdit = ({ application }) => {
                                 Cancel
                             </Link>
                         </Button>
-                        <Button type="submit">Update Job Application</Button>
+                        <CustomButton type="submit">Update Job Application</CustomButton>
                     </CardFooter>
                 </form>
             </Card>

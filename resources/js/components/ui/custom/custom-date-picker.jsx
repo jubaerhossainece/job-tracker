@@ -41,14 +41,15 @@ export function CustomDatePicker({ value, onChange, className }) {
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className={cn("w-full justify-between text-left font-normal", !date && "text-muted-foreground", className)}
+          className={cn("w-full h-11 justify-between text-left font-normal", !date && "text-muted-foreground", className)}
         >
           {date ? format(date, "PPP") : "Select date"}
           <CalendarIcon className="ml-2 h-4 w-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
-        <Calendar mode="single" selected={date} onSelect={handleSelect} initialFocus />
+        <Calendar className="custom-calendar"
+ mode="single" selected={date} onSelect={handleSelect} initialFocus />
       </PopoverContent>
     </Popover>
   )
