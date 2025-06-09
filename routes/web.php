@@ -52,6 +52,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Job Events
     Route::resource('applications.events', JobEventController::class)->shallow();
 
+    Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::put('/settings/account', [SettingController::class, 'updateAccount'])->name('settings.account.update');
+    Route::post('/settings/photo', [SettingController::class, 'updatePhoto'])->name('settings.photo.update');
+    Route::delete('/settings/photo', [SettingController::class, 'removePhoto'])->name('settings.photo.remove');
+    Route::put('/settings/social', [SettingController::class, 'updateSocial'])->name('settings.social.update');
+    Route::put('/settings/professional', [SettingController::class, 'updateProfessional'])->name('settings.professional.update');
+    Route::post('/settings/resume', [SettingController::class, 'updateResume'])->name('settings.resume.update');
+    Route::delete('/settings/resume', [SettingController::class, 'removeResume'])->name('settings.resume.remove');
+    Route::put('/settings/password', [SettingController::class, 'updatePassword'])->name('settings.password.update');
+    Route::delete('/settings/account', [SettingController::class, 'deleteAccount'])->name('settings.account.delete');
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

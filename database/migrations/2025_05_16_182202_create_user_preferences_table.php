@@ -14,13 +14,17 @@ return new class extends Migration
         Schema::create('user_preferences', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('theme')->default('light'); // light, dark
+            $table->string('theme')->default('light'); // light, dark, system
             $table->string('language')->default('en');
-            $table->string('currency', 10)->default('USD');
-            $table->string('date_format')->default('YYYY-MM-DD');
-            $table->string('font_size')->default('medium'); // small, medium, large
-            $table->string('dashboard_layout')->default('grid'); // grid, list, etc.
+            $table->string('timezone')->default('UTC');
+            $table->string('date_format')->default('Y-m-d');
+            $table->string('time_format')->default('H:i');
+            $table->string('currency')->default('USD');
+            $table->boolean('compact_mode')->default(false);
+            $table->json('dashboard_widgets')->nullable(); // Store widget preferences
             $table->timestamps();
+            
+            $table->unique('user_id');
         });
     }
 

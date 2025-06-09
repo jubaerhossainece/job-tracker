@@ -14,12 +14,18 @@ return new class extends Migration
         Schema::create('user_privacies', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->boolean('share_analytics_data')->default(false);
-            $table->boolean('allow_personalized_ads')->default(false);
-            $table->enum('account_visibility', ['public', 'private'])->default('private');
-            $table->string('data_retention_period')->default('1_year'); // or use enum
-            $table->json('connected_integrations')->nullable(); // e.g. ["Google Analytics", "Facebook Pixel"]
+            $table->boolean('profile_visible')->default(true);
+            $table->boolean('show_email')->default(false);
+            $table->boolean('show_phone')->default(false);
+            $table->boolean('show_social_links')->default(true);
+            $table->boolean('allow_search_engines')->default(false);
+            $table->boolean('data_processing_consent')->default(true);
+            $table->boolean('marketing_consent')->default(false);
+            $table->boolean('analytics_consent')->default(true);
+            $table->timestamp('last_data_export')->nullable();
             $table->timestamps();
+            
+            $table->unique('user_id');
         });
         
     }

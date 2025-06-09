@@ -14,25 +14,19 @@ return new class extends Migration
         Schema::create('user_notifications', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-        
-            // Channels
-            $table->boolean('email_notifications')->default(true);
-            $table->boolean('push_notifications')->default(false);
-            $table->boolean('sms_notifications')->default(false);
-        
-            // Types
-            $table->boolean('account_activity')->default(true);
-            $table->boolean('new_features_updates')->default(true);
-            $table->boolean('marketing_promotions')->default(false);
-        
-            // Frequency
-            $table->enum('notification_frequency', ['real-time', 'digest', 'quiet-hours'])->default('real-time');
-            
-            // Quiet Hours
-            $table->time('quiet_hours_start')->nullable();
-            $table->time('quiet_hours_end')->nullable();
-        
+            $table->boolean('email_job_alerts')->default(true);
+            $table->boolean('email_application_updates')->default(true);
+            $table->boolean('email_interview_reminders')->default(true);
+            $table->boolean('email_weekly_summary')->default(true);
+            $table->boolean('email_marketing')->default(false);
+            $table->boolean('push_job_alerts')->default(true);
+            $table->boolean('push_application_updates')->default(true);
+            $table->boolean('push_interview_reminders')->default(true);
+            $table->boolean('sms_interview_reminders')->default(false);
+            $table->boolean('sms_urgent_updates')->default(false);
             $table->timestamps();
+            
+            $table->unique('user_id');
         });        
     }
 

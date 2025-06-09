@@ -1,58 +1,19 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Settings;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 
-class SettingController extends Controller
+class AccountController extends Controller
 {
-    /**
-     * Display the settings page.
-     */
-    public function index()
-    {
-        $user = Auth::user();
-
-        // return Inertia::render('Settings', ['user'=> $user]);
-        
-        return Inertia::render('Settings/Index', [
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'phone' => $user->phone,
-                'photo' => $user->photo,
-                'address' => $user->address,
-                'city' => $user->city,
-                'state' => $user->state,
-                'country' => $user->country,
-                'postal_code' => $user->postal_code,
-                'job_title' => $user->job_title,
-                'company' => $user->company,
-                'website' => $user->website,
-                'linkedin' => $user->linkedin,
-                'github' => $user->github,
-                'twitter' => $user->twitter,
-                'bio' => $user->bio,
-                'skills' => $user->skills,
-                'languages' => $user->languages,
-                'resume' => $user->resume,
-                'portfolio' => $user->portfolio,
-                'email_verified_at' => $user->email_verified_at,
-                'created_at' => $user->created_at,
-            ]
-        ]);
-    }
-
     /**
      * Update account information.
      */
-    public function updateAccount(Request $request)
+    public function update(Request $request)
     {
         $user = Auth::user();
         
@@ -72,7 +33,7 @@ class SettingController extends Controller
 
         $user->update($validated);
 
-        return back()->with('success', 'Account information updated successfully.');
+        return redirect()->back()->with('success', 'Account information updated successfully.');
     }
 
     /**
@@ -96,7 +57,7 @@ class SettingController extends Controller
         
         $user->update(['photo' => $path]);
 
-        return back()->with('success', 'Profile photo updated successfully.');
+        return redirect()->back()->with('success', 'Profile photo updated successfully.');
     }
 
     /**
@@ -111,7 +72,7 @@ class SettingController extends Controller
             $user->update(['photo' => null]);
         }
 
-        return back()->with('success', 'Profile photo removed successfully.');
+        return redirect()->back()->with('success', 'Profile photo removed successfully.');
     }
 
     /**
@@ -130,7 +91,7 @@ class SettingController extends Controller
 
         $user->update($validated);
 
-        return back()->with('success', 'Social links updated successfully.');
+        return redirect()->back()->with('success', 'Social links updated successfully.');
     }
 
     /**
@@ -148,7 +109,7 @@ class SettingController extends Controller
 
         $user->update($validated);
 
-        return back()->with('success', 'Professional information updated successfully.');
+        return redirect()->back()->with('success', 'Professional information updated successfully.');
     }
 
     /**
@@ -172,7 +133,7 @@ class SettingController extends Controller
         
         $user->update(['resume' => $path]);
 
-        return back()->with('success', 'Resume updated successfully.');
+        return redirect()->back()->with('success', 'Resume updated successfully.');
     }
 
     /**
@@ -187,31 +148,13 @@ class SettingController extends Controller
             $user->update(['resume' => null]);
         }
 
-        return back()->with('success', 'Resume removed successfully.');
-    }
-
-    /**
-     * Update password.
-     */
-    public function updatePassword(Request $request)
-    {
-        $request->validate([
-            'current_password' => 'required|current_password',
-            'password' => ['required', 'confirmed', Password::defaults()],
-        ]);
-
-        $user = Auth::user();
-        $user->update([
-            'password' => Hash::make($request->password),
-        ]);
-
-        return back()->with('success', 'Password updated successfully.');
+        return redirect()->back()->with('success', 'Resume removed successfully.');
     }
 
     /**
      * Delete user account.
      */
-    public function deleteAccount(Request $request)
+    public function delete(Request $request)
     {
         $request->validate([
             'password' => 'required|current_password',
