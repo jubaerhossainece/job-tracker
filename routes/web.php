@@ -53,13 +53,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('applications.events', JobEventController::class)->shallow();
 
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
-    Route::put('/settings/account', [SettingController::class, 'updateAccount'])->name('settings.account.update');
-    Route::post('/settings/photo', [SettingController::class, 'updatePhoto'])->name('settings.photo.update');
-    Route::delete('/settings/photo', [SettingController::class, 'removePhoto'])->name('settings.photo.remove');
-    Route::put('/settings/social', [SettingController::class, 'updateSocial'])->name('settings.social.update');
-    Route::put('/settings/professional', [SettingController::class, 'updateProfessional'])->name('settings.professional.update');
-    Route::post('/settings/resume', [SettingController::class, 'updateResume'])->name('settings.resume.update');
-    Route::delete('/settings/resume', [SettingController::class, 'removeResume'])->name('settings.resume.remove');
+    Route::put('/settings/account', [App\Http\Controllers\Settings\AccountController::class, 'update'])->name('settings.account.update');
+    Route::post('/settings/photo', [App\Http\Controllers\Settings\AccountController::class, 'updatePhoto'])->name('settings.photo.update');
+    Route::delete('/settings/photo', [App\Http\Controllers\Settings\AccountController::class, 'removePhoto'])->name('settings.photo.remove');
+    Route::put('/settings/social', [App\Http\Controllers\Settings\AccountController::class, 'updateSocial'])->name('settings.social.update');
+    Route::put('/settings/professional', [App\Http\Controllers\Settings\AccountController::class, 'updateProfessional'])->name('settings.professional.update');
+    Route::post('/settings/resume', [App\Http\Controllers\Settings\AccountController::class, 'updateResume'])->name('settings.resume.update');
+    Route::delete('/settings/resume', [App\Http\Controllers\Settings\AccountController::class, 'removeResume'])->name('settings.resume.remove');
     Route::put('/settings/password', [SettingController::class, 'updatePassword'])->name('settings.password.update');
     Route::delete('/settings/account', [SettingController::class, 'deleteAccount'])->name('settings.account.delete');
     // Profile

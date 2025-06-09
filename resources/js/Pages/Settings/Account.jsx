@@ -95,14 +95,14 @@ const AccountSettings = ({ user }) => {
 
   const handleSocialSubmit = (e) => {
     e.preventDefault()
-    putSocial(route("settings.account.social.update"), {
+    putSocial(route("settings.social.update"), {
       preserveScroll: true,
     })
   }
 
   const handleProfessionalSubmit = (e) => {
     e.preventDefault()
-    putProfessional(route("settings.account.professional.update"), {
+    putProfessional(route("settings.professional.update"), {
       preserveScroll: true,
     })
   }
