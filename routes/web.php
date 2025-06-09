@@ -54,12 +54,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::put('/settings/account', [App\Http\Controllers\Settings\AccountController::class, 'update'])->name('settings.account.update');
-    Route::post('/settings/photo', [App\Http\Controllers\Settings\AccountController::class, 'updatePhoto'])->name('settings.photo.update');
-    Route::delete('/settings/photo', [App\Http\Controllers\Settings\AccountController::class, 'removePhoto'])->name('settings.photo.remove');
-    Route::put('/settings/social', [App\Http\Controllers\Settings\AccountController::class, 'updateSocial'])->name('settings.social.update');
-    Route::put('/settings/professional', [App\Http\Controllers\Settings\AccountController::class, 'updateProfessional'])->name('settings.professional.update');
-    Route::post('/settings/resume', [App\Http\Controllers\Settings\AccountController::class, 'updateResume'])->name('settings.resume.update');
-    Route::delete('/settings/resume', [App\Http\Controllers\Settings\AccountController::class, 'removeResume'])->name('settings.resume.remove');
+    Route::post('/settings/account/photo', [App\Http\Controllers\Settings\AccountController::class, 'updatePhoto'])->name('settings.account.photo.update');
+    Route::delete('/settings/account/photo', [App\Http\Controllers\Settings\AccountController::class, 'removePhoto'])->name('settings.account.photo.remove');
+    Route::put('/settings/account/social', [App\Http\Controllers\Settings\AccountController::class, 'updateSocial'])->name('settings.account.social.update');
+    Route::put('/settings/account/professional', [App\Http\Controllers\Settings\AccountController::class, 'updateProfessional'])->name('settings.account.professional.update');
+    Route::post('/settings/account/resume', [App\Http\Controllers\Settings\AccountController::class, 'updateResume'])->name('settings.account.resume.update');
+    Route::delete('/settings/account/resume', [App\Http\Controllers\Settings\AccountController::class, 'removeResume'])->name('settings.account.resume.remove');
     Route::put('/settings/password', [SettingController::class, 'updatePassword'])->name('settings.password.update');
     Route::delete('/settings/account', [SettingController::class, 'deleteAccount'])->name('settings.account.delete');
     // Profile

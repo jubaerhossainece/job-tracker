@@ -95,21 +95,21 @@ const AccountSettings = ({ user }) => {
 
   const handleSocialSubmit = (e) => {
     e.preventDefault()
-    putSocial(route("settings.social.update"), {
+    putSocial(route("settings.account.social.update"), {
       preserveScroll: true,
     })
   }
 
   const handleProfessionalSubmit = (e) => {
     e.preventDefault()
-    putProfessional(route("settings.professional.update"), {
+    putProfessional(route("settings.account.professional.update"), {
       preserveScroll: true,
     })
   }
 
   const handlePhotoSubmit = (e) => {
     e.preventDefault()
-    postPhoto(route("settings.photo.update"), {
+    postPhoto(route("settings.account.photo.update"), {
       preserveScroll: true,
       forceFormData: true,
       onSuccess: () => resetPhoto(),
@@ -118,7 +118,7 @@ const AccountSettings = ({ user }) => {
 
   const handleResumeSubmit = (e) => {
     e.preventDefault()
-    postResume(route("settings.resume.update"), {
+    postResume(route("settings.account.resume.update"), {
       preserveScroll: true,
       forceFormData: true,
       onSuccess: () => resetResume(),
@@ -127,13 +127,13 @@ const AccountSettings = ({ user }) => {
 
   const handleRemovePhoto = () => {
     if (confirm("Are you sure you want to remove your profile photo?")) {
-      deletePhoto(route("settings.photo.remove"))
+      deletePhoto(route("settings.account.photo.remove"))
     }
   }
 
   const handleRemoveResume = () => {
     if (confirm("Are you sure you want to remove your resume?")) {
-      deleteResume(route("settings.resume.remove"))
+      deleteResume(route("settings.account.resume.remove"))
     }
   }
 
@@ -179,7 +179,7 @@ const AccountSettings = ({ user }) => {
                     </Button>
                   </Label>
                   {photoData.photo && (
-                    <Button type="submit" size="sm" disabled={photoProcessing}>
+                    <Button type="submit" variant="secondary" size="sm" disabled={photoProcessing}>
                       <Upload className="h-4 w-4 mr-2" />
                       {photoProcessing ? "Uploading..." : "Upload"}
                     </Button>
@@ -328,7 +328,7 @@ const AccountSettings = ({ user }) => {
               <p className="text-xs text-muted-foreground">{accountData.bio?.length || 0}/1000 characters</p>
             </div>
 
-            <Button type="submit" disabled={accountProcessing}>
+            <Button type="submit" variant="secondary" disabled={accountProcessing}>
               <Save className="h-4 w-4 mr-2" />
               {accountProcessing ? "Saving..." : "Save Changes"}
             </Button>
@@ -398,7 +398,7 @@ const AccountSettings = ({ user }) => {
               </div>
             </div>
 
-            <Button type="submit" disabled={socialProcessing}>
+            <Button type="submit" variant="secondary" disabled={socialProcessing}>
               <Save className="h-4 w-4 mr-2" />
               {socialProcessing ? "Saving..." : "Save Social Links"}
             </Button>
@@ -451,7 +451,7 @@ const AccountSettings = ({ user }) => {
               {professionalErrors.portfolio && <p className="text-sm text-red-500">{professionalErrors.portfolio}</p>}
             </div>
 
-            <Button type="submit" disabled={professionalProcessing}>
+            <Button type="submit" variant="secondary" disabled={professionalProcessing}>
               <Save className="h-4 w-4 mr-2" />
               {professionalProcessing ? "Saving..." : "Save Professional Info"}
             </Button>
@@ -518,7 +518,7 @@ const AccountSettings = ({ user }) => {
             </div>
 
             {resumeData.resume && (
-              <Button type="submit" disabled={resumeProcessing}>
+              <Button type="submit" variant="secondary" disabled={resumeProcessing}>
                 <Upload className="h-4 w-4 mr-2" />
                 {resumeProcessing ? "Uploading..." : "Upload Resume"}
               </Button>
