@@ -19,7 +19,7 @@ class SettingController extends Controller
         $user = Auth::user();
 
         // return Inertia::render('Settings', ['user'=> $user]);
-        
+
         return Inertia::render('Settings/Index', [
             'user' => [
                 'id' => $user->id,
@@ -55,7 +55,7 @@ class SettingController extends Controller
     public function updateAccount(Request $request)
     {
         $user = Auth::user();
-        
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
@@ -81,7 +81,7 @@ class SettingController extends Controller
     public function updatePhoto(Request $request)
     {
         $user = Auth::user();
-        
+
         $request->validate([
             'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -93,7 +93,7 @@ class SettingController extends Controller
 
         // Store new photo
         $path = $request->file('photo')->store('profile-photos', 'public');
-        
+
         $user->update(['photo' => $path]);
 
         return back()->with('success', 'Profile photo updated successfully.');
@@ -105,7 +105,7 @@ class SettingController extends Controller
     public function removePhoto()
     {
         $user = Auth::user();
-        
+
         if ($user->photo) {
             Storage::disk('public')->delete($user->photo);
             $user->update(['photo' => null]);
@@ -120,7 +120,7 @@ class SettingController extends Controller
     public function updateSocial(Request $request)
     {
         $user = Auth::user();
-        
+
         $validated = $request->validate([
             'website' => 'nullable|url|max:255',
             'linkedin' => 'nullable|url|max:255',
@@ -139,7 +139,7 @@ class SettingController extends Controller
     public function updateProfessional(Request $request)
     {
         $user = Auth::user();
-        
+
         $validated = $request->validate([
             'skills' => 'nullable|string|max:1000',
             'languages' => 'nullable|string|max:500',
@@ -157,20 +157,30 @@ class SettingController extends Controller
     public function updateResume(Request $request)
     {
         $user = Auth::user();
-        
+
         $request->validate([
-            'resume' => 'required|file|mimes:pdf,doc,docx|max:5120', // 5MB max
+            'resume' => 'required|file|mimes:pdf,doc,docx|max:5120',
         ]);
 
-        // Delete old resume if exists
-        if ($user->resume) {
-            Storage::disk('public')->delete($user->resume);
-        }
+        // Ensure there's a file and it's valid before proceeding
+        if ($request->hasFile('resume') && $request->file('resume')->isValid()) {
+            // Delete old resume only if it exists and is not '0'
+            if (!empty($user->resume) && $user->resume !== '0') {
+                Storage::disk('public')->delete($user->resume);
+            }
 
-        // Store new resume
-        $path = $request->file('resume')->store('resumes', 'public');
-        
-        $user->update(['resume' => $path]);
+            // Store new resume
+            $newPath = $request->file('resume')->store('resumes', 'public');
+
+            if ($newPath) { // Check if storing was successful and returned a path
+                $user->update(['resume' => $newPath]);
+            } else {
+                // Log an error or return a specific error message if path is not generated
+                return back()->with('error', 'Could not store resume file.');
+            }
+        } else {
+            return back()->with('error', 'Invalid resume file provided.');
+        }
 
         return back()->with('success', 'Resume updated successfully.');
     }
@@ -181,7 +191,7 @@ class SettingController extends Controller
     public function removeResume()
     {
         $user = Auth::user();
-        
+
         if ($user->resume) {
             Storage::disk('public')->delete($user->resume);
             $user->update(['resume' => null]);
