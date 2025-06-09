@@ -10,7 +10,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { useForm } from "@inertiajs/react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-// import { route } from "@/utils/route" // Import route function
 
 const AccountSettings = ({ user }) => {
   // Account form
@@ -110,7 +109,7 @@ const AccountSettings = ({ user }) => {
 
   const handlePhotoSubmit = (e) => {
     e.preventDefault()
-    postPhoto(route("settings.account.photo.update"), {
+    postPhoto(route("settings.photo.update"), {
       preserveScroll: true,
       forceFormData: true,
       onSuccess: () => resetPhoto(),
@@ -119,7 +118,7 @@ const AccountSettings = ({ user }) => {
 
   const handleResumeSubmit = (e) => {
     e.preventDefault()
-    postResume(route("settings.account.resume.update"), {
+    postResume(route("settings.resume.update"), {
       preserveScroll: true,
       forceFormData: true,
       onSuccess: () => resetResume(),
@@ -128,13 +127,13 @@ const AccountSettings = ({ user }) => {
 
   const handleRemovePhoto = () => {
     if (confirm("Are you sure you want to remove your profile photo?")) {
-      deletePhoto(route("settings.account.photo.remove"))
+      deletePhoto(route("settings.photo.remove"))
     }
   }
 
   const handleRemoveResume = () => {
     if (confirm("Are you sure you want to remove your resume?")) {
-      deleteResume(route("settings.account.resume.remove"))
+      deleteResume(route("settings.resume.remove"))
     }
   }
 
