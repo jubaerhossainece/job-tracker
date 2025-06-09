@@ -13,10 +13,10 @@ class AccountController extends Controller
     /**
      * Update account information.
      */
-    public function update(Request $request)
+    public function updateAccount(Request $request)
     {
         $user = Auth::user();
-        
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
@@ -33,7 +33,7 @@ class AccountController extends Controller
 
         $user->update($validated);
 
-        return redirect()->back()->with('success', 'Account information updated successfully.');
+        return back()->with('success', 'Account information updated successfully.');
     }
 
     /**
@@ -42,7 +42,7 @@ class AccountController extends Controller
     public function updatePhoto(Request $request)
     {
         $user = Auth::user();
-        
+
         $request->validate([
             'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -54,10 +54,10 @@ class AccountController extends Controller
 
         // Store new photo
         $path = $request->file('photo')->store('profile-photos', 'public');
-        
+
         $user->update(['photo' => $path]);
 
-        return redirect()->back()->with('success', 'Profile photo updated successfully.');
+        return back()->with('success', 'Profile photo updated successfully.');
     }
 
     /**
@@ -66,13 +66,13 @@ class AccountController extends Controller
     public function removePhoto()
     {
         $user = Auth::user();
-        
+
         if ($user->photo) {
             Storage::disk('public')->delete($user->photo);
             $user->update(['photo' => null]);
         }
 
-        return redirect()->back()->with('success', 'Profile photo removed successfully.');
+        return back()->with('success', 'Profile photo removed successfully.');
     }
 
     /**
@@ -81,7 +81,7 @@ class AccountController extends Controller
     public function updateSocial(Request $request)
     {
         $user = Auth::user();
-        
+
         $validated = $request->validate([
             'website' => 'nullable|url|max:255',
             'linkedin' => 'nullable|url|max:255',
@@ -91,7 +91,7 @@ class AccountController extends Controller
 
         $user->update($validated);
 
-        return redirect()->back()->with('success', 'Social links updated successfully.');
+        return back()->with('success', 'Social links updated successfully.');
     }
 
     /**
@@ -100,7 +100,7 @@ class AccountController extends Controller
     public function updateProfessional(Request $request)
     {
         $user = Auth::user();
-        
+
         $validated = $request->validate([
             'skills' => 'nullable|string|max:1000',
             'languages' => 'nullable|string|max:500',
@@ -109,7 +109,7 @@ class AccountController extends Controller
 
         $user->update($validated);
 
-        return redirect()->back()->with('success', 'Professional information updated successfully.');
+        return back()->with('success', 'Professional information updated successfully.');
     }
 
     /**
@@ -118,22 +118,32 @@ class AccountController extends Controller
     public function updateResume(Request $request)
     {
         $user = Auth::user();
-        
+
         $request->validate([
-            'resume' => 'required|file|mimes:pdf,doc,docx|max:5120', // 5MB max
+            'resume' => 'required|file|mimes:pdf,doc,docx|max:5120',
         ]);
 
-        // Delete old resume if exists
-        if ($user->resume) {
-            Storage::disk('public')->delete($user->resume);
+        // Ensure there's a file and it's valid before proceeding
+        if ($request->hasFile('resume') && $request->file('resume')->isValid()) {
+            // Delete old resume only if it exists and is not '0'
+            if (!empty($user->resume) && $user->resume !== '0') {
+                Storage::disk('public')->delete($user->resume);
+            }
+
+            // Store new resume
+            $newPath = $request->file('resume')->store('resumes', 'public');
+
+            if ($newPath) { // Check if storing was successful and returned a path
+                $user->update(['resume' => $newPath]);
+            } else {
+                // Log an error or return a specific error message if path is not generated
+                return back()->with('error', 'Could not store resume file.');
+            }
+        } else {
+            return back()->with('error', 'Invalid resume file provided.');
         }
 
-        // Store new resume
-        $path = $request->file('resume')->store('resumes', 'public');
-        
-        $user->update(['resume' => $path]);
-
-        return redirect()->back()->with('success', 'Resume updated successfully.');
+        return back()->with('success', 'Resume updated successfully.');
     }
 
     /**
@@ -142,38 +152,12 @@ class AccountController extends Controller
     public function removeResume()
     {
         $user = Auth::user();
-        
+
         if ($user->resume) {
             Storage::disk('public')->delete($user->resume);
             $user->update(['resume' => null]);
         }
 
-        return redirect()->back()->with('success', 'Resume removed successfully.');
-    }
-
-    /**
-     * Delete user account.
-     */
-    public function delete(Request $request)
-    {
-        $request->validate([
-            'password' => 'required|current_password',
-        ]);
-
-        $user = Auth::user();
-
-        // Delete user files
-        if ($user->photo) {
-            Storage::disk('public')->delete($user->photo);
-        }
-        if ($user->resume) {
-            Storage::disk('public')->delete($user->resume);
-        }
-
-        // Delete user and logout
-        $user->delete();
-        Auth::logout();
-
-        return redirect('/')->with('success', 'Account deleted successfully.');
+        return back()->with('success', 'Resume removed successfully.');
     }
 }
