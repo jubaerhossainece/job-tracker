@@ -1,13 +1,24 @@
 "use client"
 
-import { Shield, Save, Key, Monitor, Clock, MapPin, Trash2 } from "lucide-react" // Added Trash2
+import { Shield, Save, Key, Monitor, Clock, MapPin, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { useForm, router } from "@inertiajs/react" // Added router
+import { useForm, router } from "@inertiajs/react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const SecuritySettings = ({ user }) => {
   // Password form
@@ -26,8 +37,8 @@ const SecuritySettings = ({ user }) => {
 
   // Two-factor form
   const {
-    data: twoFactorData,
-    setData: setTwoFactorData,
+    // data: twoFactorData, // Not used yet
+    // setData: setTwoFactorData, // Not used yet
     post: postTwoFactor,
     delete: deleteTwoFactor,
     processing: twoFactorProcessing,
@@ -67,23 +78,20 @@ const SecuritySettings = ({ user }) => {
     }
   }
 
-  const handleDeleteAccountSubmit = (e) => {
-    e.preventDefault();
-    if (confirm("Are you absolutely sure you want to delete your account? This action cannot be undone.")) {
-      deleteAccountFormAction(route("settings.account.delete"), {
-        preserveScroll: true,
-        onSuccess: () => {
-          // Redirect or further actions can be handled here if needed
-          // For now, just reset the form
-          resetDeleteAccountForm();
-        },
-        onError: () => {
-          // Handle specific errors, e.g., focus password field
-          // For now, errors will be displayed below the input
-        }
-      });
-    }
-  };
+  // const handleDeleteAccountSubmit = (e) => { // No longer needed
+  //   e.preventDefault();
+  //   if (confirm("Are you absolutely sure you want to delete your account? This action cannot be undone.")) {
+  //     deleteAccountFormAction(route("settings.account.delete"), {
+  //       preserveScroll: true,
+  //       onSuccess: () => {
+  //         resetDeleteAccountForm();
+  //       },
+  //       onError: () => {
+  //         // Handle specific errors
+  //       }
+  //     });
+  //   }
+  // };
 
   // Mock data for sessions (both active and login history from single table)
   const activeSessions = [
@@ -346,25 +354,59 @@ const SecuritySettings = ({ user }) => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleDeleteAccountSubmit} className="space-y-4">
+          <div className="space-y-4"> {/* Changed from form to div to handle AlertDialog correctly */}
             <div className="space-y-2">
               <Label htmlFor="current_password_for_delete">Current Password</Label>
               <Input
                 id="current_password_for_delete"
-                name="password" // Name must match the key in deleteAccountData and backend validation
+                name="password"
                 type="password"
                 value={deleteAccountData.password}
                 onChange={(e) => setDeleteAccountData("password", e.target.value)}
                 placeholder="Enter your current password to confirm"
+                disabled={deleteAccountProcessing} // Disable input while processing
               />
               {deleteAccountErrors.password && (
                 <p className="text-sm text-red-500">{deleteAccountErrors.password}</p>
               )}
             </div>
-            <Button type="submit" variant="destructive" disabled={deleteAccountProcessing}>
-              {deleteAccountProcessing ? "Deleting..." : "Delete Account"}
-            </Button>
-          </form>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button type="button" variant="destructive" disabled={deleteAccountProcessing || !deleteAccountData.password}> {/* Disable if no password or processing */}
+                  {deleteAccountProcessing ? "Deleting..." : "Delete Account"}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete your account and remove your data from our servers.
+                    Please confirm by typing your current password above.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel onClick={() => {if (deleteAccountProcessing) resetDeleteAccountForm(); }}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => {
+                      deleteAccountFormAction(route("settings.account.delete"), {
+                        preserveScroll: true,
+                        onSuccess: () => {
+                          resetDeleteAccountForm();
+                          // router.visit('/'); // Optionally redirect
+                        },
+                        // onError is implicitly handled by useForm errors object
+                      });
+                    }}
+                    disabled={deleteAccountProcessing || !deleteAccountData.password} // Also disable action if no password
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {deleteAccountProcessing ? "Deleting..." : "Confirm Delete"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </CardContent>
       </Card>
     </div>
