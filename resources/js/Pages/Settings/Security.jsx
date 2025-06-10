@@ -1,27 +1,13 @@
 "use client";
 
-import {
-    Shield,
-    Save,
-    Key,
-    Monitor,
-    Clock,
-    MapPin,
-    Trash2,
-} from "lucide-react"; // Added Trash2
-import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { useForm, router } from "@inertiajs/react"; // Added router
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Shield, Save, Key, Monitor, Clock, MapPin, Trash2 } from "lucide-react" // Added Trash2
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
+import { useForm, router } from "@inertiajs/react" // Added router
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 const SecuritySettings = ({ user }) => {
     // Password form
@@ -38,26 +24,26 @@ const SecuritySettings = ({ user }) => {
         password_confirmation: "",
     });
 
-    // Two-factor form
-    const {
-        data: twoFactorData,
-        setData: setTwoFactorData,
-        post: postTwoFactor,
-        delete: deleteTwoFactor,
-        processing: twoFactorProcessing,
-    } = useForm({});
+  // Two-factor form
+  const {
+    data: twoFactorData,
+    setData: setTwoFactorData,
+    post: postTwoFactor,
+    delete: deleteTwoFactor,
+    processing: twoFactorProcessing,
+  } = useForm({})
 
-    // Account Deletion form
-    const {
-        data: deleteAccountData,
-        setData: setDeleteAccountData,
-        delete: deleteAccountFormAction,
-        processing: deleteAccountProcessing,
-        errors: deleteAccountErrors,
-        reset: resetDeleteAccountForm,
-    } = useForm({
-        password: "", // For current password confirmation
-    });
+  // Account Deletion form
+  const {
+    data: deleteAccountData,
+    setData: setDeleteAccountData,
+    delete: deleteAccountFormAction,
+    processing: deleteAccountProcessing,
+    errors: deleteAccountErrors,
+    reset: resetDeleteAccountForm,
+  } = useForm({
+    password: "", // For current password confirmation
+  });
 
     const handlePasswordSubmit = (e) => {
         e.preventDefault();
@@ -73,39 +59,31 @@ const SecuritySettings = ({ user }) => {
         });
     };
 
-    const handleDisableTwoFactor = () => {
-        if (
-            confirm(
-                "Are you sure you want to disable two-factor authentication?"
-            )
-        ) {
-            deleteTwoFactor(route("settings.security.two-factor.disable"), {
-                preserveScroll: true,
-            });
-        }
-    };
+  const handleDisableTwoFactor = () => {
+    if (confirm("Are you sure you want to disable two-factor authentication?")) {
+      deleteTwoFactor(route("settings.security.two-factor.disable"), {
+        preserveScroll: true,
+      })
+    }
+  }
 
-    const handleDeleteAccountSubmit = (e) => {
-        e.preventDefault();
-        if (
-            confirm(
-                "Are you absolutely sure you want to delete your account? This action cannot be undone."
-            )
-        ) {
-            deleteAccountFormAction(route("settings.account.delete"), {
-                preserveScroll: true,
-                onSuccess: () => {
-                    // Redirect or further actions can be handled here if needed
-                    // For now, just reset the form
-                    resetDeleteAccountForm();
-                },
-                onError: () => {
-                    // Handle specific errors, e.g., focus password field
-                    // For now, errors will be displayed below the input
-                },
-            });
+  const handleDeleteAccountSubmit = (e) => {
+    e.preventDefault();
+    if (confirm("Are you absolutely sure you want to delete your account? This action cannot be undone.")) {
+      deleteAccountFormAction(route("settings.account.delete"), {
+        preserveScroll: true,
+        onSuccess: () => {
+          // Redirect or further actions can be handled here if needed
+          // For now, just reset the form
+          resetDeleteAccountForm();
+        },
+        onError: () => {
+          // Handle specific errors, e.g., focus password field
+          // For now, errors will be displayed below the input
         }
-    };
+      });
+    }
+  };
 
     // Mock data for sessions (both active and login history from single table)
     const activeSessions = [
@@ -380,128 +358,81 @@ const SecuritySettings = ({ user }) => {
                 </CardContent>
             </Card>
 
-            {/* Login History */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Clock className="h-5 w-5" />
-                        Login History
-                    </CardTitle>
-                    <CardDescription>
-                        Recent login activity on your account.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        {loginHistory.map((login) => (
-                            <div
-                                key={login.id}
-                                className="flex items-center justify-between p-4 border rounded-lg"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div
-                                        className={`p-2 rounded-full ${
-                                            login.status === "success"
-                                                ? "bg-green-100"
-                                                : "bg-red-100"
-                                        }`}
-                                    >
-                                        <Monitor
-                                            className={`h-4 w-4 ${
-                                                login.status === "success"
-                                                    ? "text-green-600"
-                                                    : "text-red-600"
-                                            }`}
-                                        />
-                                    </div>
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <p className="font-medium">
-                                                {login.device}
-                                            </p>
-                                            <Badge
-                                                variant={
-                                                    login.status === "success"
-                                                        ? "default"
-                                                        : "destructive"
-                                                }
-                                                className="text-xs"
-                                            >
-                                                {login.status}
-                                            </Badge>
-                                        </div>
-                                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                            <span className="flex items-center gap-1">
-                                                <MapPin className="h-3 w-3" />
-                                                {login.location}
-                                            </span>
-                                            <span>IP: {login.ip}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                    {login.time}
-                                </div>
-                            </div>
-                        ))}
+      {/* Login History */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            Login History
+          </CardTitle>
+          <CardDescription>Recent login activity on your account.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {loginHistory.map((login) => (
+              <div key={login.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-full ${login.status === "success" ? "bg-green-100" : "bg-red-100"}`}>
+                    <Monitor className={`h-4 w-4 ${login.status === "success" ? "text-green-600" : "text-red-600"}`} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium">{login.device}</p>
+                      <Badge variant={login.status === "success" ? "default" : "destructive"} className="text-xs">
+                        {login.status}
+                      </Badge>
                     </div>
-                </CardContent>
-            </Card>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        {login.location}
+                      </span>
+                      <span>IP: {login.ip}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-sm text-muted-foreground">{login.time}</div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
-            {/* Delete Account */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-destructive">
-                        <Trash2 className="h-5 w-5" />
-                        Delete Account
-                    </CardTitle>
-                    <CardDescription>
-                        Permanently delete your account and all associated data.
-                        This action is irreversible.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <form
-                        onSubmit={handleDeleteAccountSubmit}
-                        className="space-y-4"
-                    >
-                        <div className="space-y-2">
-                            <Label htmlFor="current_password_for_delete">
-                                Current Password
-                            </Label>
-                            <Input
-                                id="current_password_for_delete"
-                                name="password" // Name must match the key in deleteAccountData and backend validation
-                                type="password"
-                                value={deleteAccountData.password}
-                                onChange={(e) =>
-                                    setDeleteAccountData(
-                                        "password",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="Enter your current password to confirm"
-                            />
-                            {deleteAccountErrors.password && (
-                                <p className="text-sm text-red-500">
-                                    {deleteAccountErrors.password}
-                                </p>
-                            )}
-                        </div>
-                        <Button
-                            type="submit"
-                            variant="destructive"
-                            disabled={deleteAccountProcessing}
-                        >
-                            {deleteAccountProcessing
-                                ? "Deleting..."
-                                : "Delete Account"}
-                        </Button>
-                    </form>
-                </CardContent>
-            </Card>
-        </div>
-    );
-};
+      {/* Delete Account */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-destructive">
+            <Trash2 className="h-5 w-5" />
+            Delete Account
+          </CardTitle>
+          <CardDescription>
+            Permanently delete your account and all associated data. This action is irreversible.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleDeleteAccountSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="current_password_for_delete">Current Password</Label>
+              <Input
+                id="current_password_for_delete"
+                name="password" // Name must match the key in deleteAccountData and backend validation
+                type="password"
+                value={deleteAccountData.password}
+                onChange={(e) => setDeleteAccountData("password", e.target.value)}
+                placeholder="Enter your current password to confirm"
+              />
+              {deleteAccountErrors.password && (
+                <p className="text-sm text-red-500">{deleteAccountErrors.password}</p>
+              )}
+            </div>
+            <Button type="submit" variant="destructive" disabled={deleteAccountProcessing}>
+              {deleteAccountProcessing ? "Deleting..." : "Delete Account"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
 
-export default SecuritySettings;
+export default SecuritySettings
