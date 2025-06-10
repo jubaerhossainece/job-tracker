@@ -12,6 +12,7 @@ import { useForm } from "@inertiajs/react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 const AccountSettings = ({ user }) => {
+  console.log('User prop in AccountSettings:', JSON.stringify(user, null, 2)); // Log the user prop
   // Account form
   const {
     data: accountData,
@@ -474,9 +475,13 @@ const AccountSettings = ({ user }) => {
                 </div>
                 <div>
                   <p className="font-medium">Current Resume</p>
-                  <p className="text-sm text-muted-foreground">
-                    Uploaded on {new Date(user.updated_at).toLocaleDateString()}
-                  </p>
+                  {user.resume_uploaded_at ? (
+                    <p className="text-sm text-muted-foreground">
+                      Uploaded on {new Date(user.resume_uploaded_at).toLocaleDateString()}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Uploaded on (date not available)</p>
+                  )}
                 </div>
               </div>
               <div className="flex gap-2">

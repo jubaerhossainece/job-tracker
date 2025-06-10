@@ -1,14 +1,24 @@
 "use client"
 
-import { Shield, Save, Key, Monitor, Clock, MapPin } from "lucide-react"
+import { Shield, Save, Key, Monitor, Clock, MapPin, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { useForm } from "@inertiajs/react"
+import { useForm, router } from "@inertiajs/react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-// import { route } from "@/utils/route" // Import route function
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const SecuritySettings = ({ user }) => {
   // Password form
@@ -27,12 +37,24 @@ const SecuritySettings = ({ user }) => {
 
   // Two-factor form
   const {
-    data: twoFactorData,
-    setData: setTwoFactorData,
+    // data: twoFactorData, // Not used yet
+    // setData: setTwoFactorData, // Not used yet
     post: postTwoFactor,
     delete: deleteTwoFactor,
     processing: twoFactorProcessing,
   } = useForm({})
+
+  // Account Deletion form
+  const {
+    data: deleteAccountData,
+    setData: setDeleteAccountData,
+    delete: deleteAccountFormAction,
+    processing: deleteAccountProcessing,
+    errors: deleteAccountErrors,
+    reset: resetDeleteAccountForm,
+  } = useForm({
+    password: "", // For current password confirmation
+  });
 
   const handlePasswordSubmit = (e) => {
     e.preventDefault()
@@ -55,6 +77,21 @@ const SecuritySettings = ({ user }) => {
       })
     }
   }
+
+  // const handleDeleteAccountSubmit = (e) => { // No longer needed
+  //   e.preventDefault();
+  //   if (confirm("Are you absolutely sure you want to delete your account? This action cannot be undone.")) {
+  //     deleteAccountFormAction(route("settings.account.delete"), {
+  //       preserveScroll: true,
+  //       onSuccess: () => {
+  //         resetDeleteAccountForm();
+  //       },
+  //       onError: () => {
+  //         // Handle specific errors
+  //       }
+  //     });
+  //   }
+  // };
 
   // Mock data for sessions (both active and login history from single table)
   const activeSessions = [
@@ -301,6 +338,74 @@ const SecuritySettings = ({ user }) => {
                 <div className="text-sm text-muted-foreground">{login.time}</div>
               </div>
             ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Delete Account */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-destructive">
+            <Trash2 className="h-5 w-5" />
+            Delete Account
+          </CardTitle>
+          <CardDescription>
+            Permanently delete your account and all associated data. This action is irreversible.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4"> {/* Changed from form to div to handle AlertDialog correctly */}
+            <div className="space-y-2">
+              <Label htmlFor="current_password_for_delete">Current Password</Label>
+              <Input
+                id="current_password_for_delete"
+                name="password"
+                type="password"
+                value={deleteAccountData.password}
+                onChange={(e) => setDeleteAccountData("password", e.target.value)}
+                placeholder="Enter your current password to confirm"
+                disabled={deleteAccountProcessing} // Disable input while processing
+              />
+              {deleteAccountErrors.password && (
+                <p className="text-sm text-red-500">{deleteAccountErrors.password}</p>
+              )}
+            </div>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button type="button" variant="destructive" disabled={deleteAccountProcessing || !deleteAccountData.password}> {/* Disable if no password or processing */}
+                  {deleteAccountProcessing ? "Deleting..." : "Delete Account"}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete your account and remove your data from our servers.
+                    Please confirm by typing your current password above.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel onClick={() => {if (deleteAccountProcessing) resetDeleteAccountForm(); }}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => {
+                      deleteAccountFormAction(route("settings.account.delete"), {
+                        preserveScroll: true,
+                        onSuccess: () => {
+                          resetDeleteAccountForm();
+                          // router.visit('/'); // Optionally redirect
+                        },
+                        // onError is implicitly handled by useForm errors object
+                      });
+                    }}
+                    disabled={deleteAccountProcessing || !deleteAccountData.password} // Also disable action if no password
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {deleteAccountProcessing ? "Deleting..." : "Confirm Delete"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </CardContent>
       </Card>
