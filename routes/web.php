@@ -6,6 +6,7 @@ use App\Http\Controllers\JobEventController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Settings\AccountController;
+use App\Http\Controllers\Settings\SecurityController;
 use App\Http\Controllers\UserSettingsController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -61,8 +62,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/settings/professional', [AccountController::class, 'updateProfessional'])->name('settings.professional.update');
     Route::post('/settings/resume', [AccountController::class, 'updateResume'])->name('settings.resume.update');
     Route::delete('/settings/resume', [AccountController::class, 'removeResume'])->name('settings.resume.remove');
-    Route::put('/settings/password', [SettingController::class, 'updatePassword'])->name('settings.password.update');
-    Route::delete('/settings/account', [SettingController::class, 'deleteAccount'])->name('settings.account.delete');
+    Route::put('/settings/password', [SecurityController::class, 'updatePassword'])->name('settings.security.password.update');
+    Route::delete('/settings/account', [SecurityController::class, 'destroy'])->name('settings.account.delete');
+  
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
