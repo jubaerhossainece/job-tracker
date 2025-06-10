@@ -134,7 +134,10 @@ class AccountController extends Controller
             $newPath = $request->file('resume')->store('resumes', 'public');
 
             if ($newPath) { // Check if storing was successful and returned a path
-                $user->update(['resume' => $newPath]);
+                $user->update([
+                    'resume' => $newPath,
+                    'resume_uploaded_at' => now(),
+                ]);
             } else {
                 // Log an error or return a specific error message if path is not generated
                 return back()->with('error', 'Could not store resume file.');
@@ -155,7 +158,10 @@ class AccountController extends Controller
 
         if ($user->resume) {
             Storage::disk('public')->delete($user->resume);
-            $user->update(['resume' => null]);
+            $user->update([
+                'resume' => null,
+                'resume_uploaded_at' => null,
+            ]);
         }
 
         return back()->with('success', 'Resume removed successfully.');

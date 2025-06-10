@@ -41,6 +41,7 @@ class SettingController extends Controller
                 'portfolio' => $user->portfolio,
                 'email_verified_at' => $user->email_verified_at,
                 'created_at' => $user->created_at,
+                'resume_uploaded_at' => $user->resume_uploaded_at,
             ]
         ]);
     }

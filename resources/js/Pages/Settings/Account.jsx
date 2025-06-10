@@ -12,6 +12,7 @@ import { useForm } from "@inertiajs/react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 const AccountSettings = ({ user }) => {
+  console.log('User prop in AccountSettings:', JSON.stringify(user, null, 2)); // <--- ADD THIS LINE
   // Account form
   const {
     data: accountData,
@@ -475,7 +476,7 @@ const AccountSettings = ({ user }) => {
                 <div>
                   <p className="font-medium">Current Resume</p>
                   <p className="text-sm text-muted-foreground">
-                    Uploaded on {new Date(user.updated_at).toLocaleDateString()}
+                    Uploaded on {new Date(user.resume_uploaded_at).toLocaleString()}
                   </p>
                 </div>
               </div>

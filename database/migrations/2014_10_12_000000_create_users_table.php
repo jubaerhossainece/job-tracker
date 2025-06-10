@@ -48,6 +48,7 @@ return new class extends Migration
             $table->string('hobbies')->nullable();
             $table->string('bio')->nullable();
             $table->string('password');
+            $table->timestamp('resume_uploaded_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
