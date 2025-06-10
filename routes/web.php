@@ -55,7 +55,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('applications.events', JobEventController::class)->shallow();
 
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
-    Route::put('/settings/account', [AccountController::class, 'update'])->name('settings.account.update');
+    Route::put('/settings/account', [AccountController::class, 'updateAccount'])->name('settings.account.update');
     Route::post('/settings/account/photo', [AccountController::class, 'updatePhoto'])->name('settings.account.photo.update');
     Route::delete('/settings/account/photo', [AccountController::class, 'removePhoto'])->name('settings.account.photo.remove');
     Route::put('/settings/account/social', [AccountController::class, 'updateSocial'])->name('settings.account.social.update');
