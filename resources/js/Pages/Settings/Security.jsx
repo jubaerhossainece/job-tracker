@@ -1,14 +1,13 @@
 "use client"
 
-import { Shield, Save, Key, Monitor, Clock, MapPin } from "lucide-react"
+import { Shield, Save, Key, Monitor, Clock, MapPin, Trash2 } from "lucide-react" // Added Trash2
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { useForm } from "@inertiajs/react"
+import { useForm, router } from "@inertiajs/react" // Added router
 import { Alert, AlertDescription } from "@/components/ui/alert"
-// import { route } from "@/utils/route" // Import route function
 
 const SecuritySettings = ({ user }) => {
   // Password form
@@ -34,6 +33,18 @@ const SecuritySettings = ({ user }) => {
     processing: twoFactorProcessing,
   } = useForm({})
 
+  // Account Deletion form
+  const {
+    data: deleteAccountData,
+    setData: setDeleteAccountData,
+    delete: deleteAccountFormAction,
+    processing: deleteAccountProcessing,
+    errors: deleteAccountErrors,
+    reset: resetDeleteAccountForm,
+  } = useForm({
+    password: "", // For current password confirmation
+  });
+
   const handlePasswordSubmit = (e) => {
     e.preventDefault()
     putPassword(route("settings.security.password.update"), {
@@ -55,6 +66,24 @@ const SecuritySettings = ({ user }) => {
       })
     }
   }
+
+  const handleDeleteAccountSubmit = (e) => {
+    e.preventDefault();
+    if (confirm("Are you absolutely sure you want to delete your account? This action cannot be undone.")) {
+      deleteAccountFormAction(route("settings.account.delete"), {
+        preserveScroll: true,
+        onSuccess: () => {
+          // Redirect or further actions can be handled here if needed
+          // For now, just reset the form
+          resetDeleteAccountForm();
+        },
+        onError: () => {
+          // Handle specific errors, e.g., focus password field
+          // For now, errors will be displayed below the input
+        }
+      });
+    }
+  };
 
   // Mock data for sessions (both active and login history from single table)
   const activeSessions = [
@@ -302,6 +331,40 @@ const SecuritySettings = ({ user }) => {
               </div>
             ))}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Delete Account */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-destructive">
+            <Trash2 className="h-5 w-5" />
+            Delete Account
+          </CardTitle>
+          <CardDescription>
+            Permanently delete your account and all associated data. This action is irreversible.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleDeleteAccountSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="current_password_for_delete">Current Password</Label>
+              <Input
+                id="current_password_for_delete"
+                name="password" // Name must match the key in deleteAccountData and backend validation
+                type="password"
+                value={deleteAccountData.password}
+                onChange={(e) => setDeleteAccountData("password", e.target.value)}
+                placeholder="Enter your current password to confirm"
+              />
+              {deleteAccountErrors.password && (
+                <p className="text-sm text-red-500">{deleteAccountErrors.password}</p>
+              )}
+            </div>
+            <Button type="submit" variant="destructive" disabled={deleteAccountProcessing}>
+              {deleteAccountProcessing ? "Deleting..." : "Delete Account"}
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </div>
