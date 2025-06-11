@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Models\LoginHistory;
+use App\Models\Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -102,11 +103,11 @@ class SecurityController extends Controller
     public function getActiveSessions(Request $request)
     {
         if (config('session.driver') !== 'database') {
-            return collect(); 
+            return collect();
         }
 
         $userId = Auth::id();
-        $currentSessionId = $request->session()->getId(); 
+        $currentSessionId = $request->session()->getId();
         $agentParser = new Agent();
 
         $sessions = DB::table(config('session.table', 'sessions'))
@@ -115,7 +116,7 @@ class SecurityController extends Controller
             ->get();
 
         return $sessions->map(function ($session) use ($agentParser, $currentSessionId) {
-            $agentParser->setUserAgent($session->user_agent); 
+            $agentParser->setUserAgent($session->user_agent);
 
             return (object) [
                 'id' => $session->id,
@@ -125,8 +126,8 @@ class SecurityController extends Controller
                 'platform' => $agentParser->platform(),
                 'is_current_session' => $session->id === $currentSessionId,
                 'last_activity' => Carbon::createFromTimestamp($session->last_activity)->diffForHumans(),
-                'last_activity_raw' => $session->last_activity, 
-                'user_agent_raw' => $session->user_agent, 
+                'last_activity_raw' => $session->last_activity,
+                'user_agent_raw' => $session->user_agent,
             ];
         });
     }
@@ -136,7 +137,7 @@ class SecurityController extends Controller
      */
     public function logoutOtherSessions(Request $request)
     {
-        $request->validateWithBag('logoutOtherSessions', [ 
+        $request->validateWithBag('logoutOtherSessions', [
             'password' => ['required', 'current_password'],
         ]);
 
@@ -151,5 +152,18 @@ class SecurityController extends Controller
         // or if logoutOtherDevices itself throws an exception on some internal failure.
         // However, if logoutOtherDevices could return false without an exception:
         return back()->withErrors(['password' => __('Could not log out from other browser sessions.')], 'logoutOtherSessions');
+    }
+
+
+    public function logoutOtherSession(Session $session)
+    {
+        if ($session->user_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized.'], 403);
+        }
+
+        $session->delete();
+        return redirect()
+            ->back()
+            ->with('success', 'Session revoked successfully.');
     }
 }

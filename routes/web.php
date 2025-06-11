@@ -64,9 +64,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/settings/account/resume', [AccountController::class, 'removeResume'])->name('settings.account.resume.remove');
     Route::put('/settings/password', [SecurityController::class, 'updatePassword'])->name('settings.security.password.update');
     Route::delete('/settings/account', [SecurityController::class, 'destroy'])->name('settings.account.delete');
-    Route::post('/settings/security/logout-other-sessions', [SecurityController::class, 'logoutOtherSessions'])
-        ->name('settings.security.logout-other');
+    // Route::post('/settings/security/logout-other-sessions', [SecurityController::class, 'logoutOtherSessions'])
+    //     ->name('settings.security.logout-other');
 
+    // routes/web.php
+    Route::delete('/settings/security/session/{session}', [SecurityController::class, 'logoutOtherSession'])->name('settings.security.session.destroy');
 
 
     // Profile
