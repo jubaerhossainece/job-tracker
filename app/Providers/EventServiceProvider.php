@@ -20,6 +20,11 @@ class EventServiceProvider extends ServiceProvider
         ],
     ];
 
+    // ✅ Register subscriber classes here
+    protected $subscribe = [
+        \App\Listeners\LogAuthenticationAttempt::class,
+    ];
+
     /**
      * Register any events for your application.
      */

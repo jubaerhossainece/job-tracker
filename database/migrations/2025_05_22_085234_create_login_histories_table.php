@@ -12,15 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('login_histories', function (Blueprint $table) {
-            Schema::create('login_histories', function (Blueprint $table) {
-                $table->id();
-                $table->unsignedBigInteger('user_id')->nullable()->index();
-                $table->string('ip_address')->nullable();
-                $table->text('user_agent')->nullable();
-                $table->timestamp('login_at')->useCurrent();
-                $table->boolean('login_successful');
-                $table->timestamps();
-            });
+            $table->id();
+            $table->unsignedBigInteger('user_id')->nullable()->index();
+            $table->string('location')->nullable();
+            $table->string('ip_address')->nullable();
+            $table->text('user_agent')->nullable();
+            $table->timestamp('login_at')->useCurrent();
+            $table->boolean('login_successful');
+            $table->timestamps();
         });
     }
 

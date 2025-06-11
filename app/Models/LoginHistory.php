@@ -17,6 +17,7 @@ class LoginHistory extends Model
      */
     protected $fillable = [
         'user_id',
+        'location',
         'ip_address',
         'user_agent',
         'login_at',

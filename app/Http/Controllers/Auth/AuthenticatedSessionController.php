@@ -36,14 +36,14 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
         $user = Auth::user();
-        LoginHistory::create([
-            'user_id'    => $user->id,
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'logged_in_at'   => now(),
-            'status'     => true,
-            'location'   => $this->getLocation($request->ip()), // optional
-        ]);
+        // LoginHistory::create([
+        //     'user_id'    => $user->id,
+        //     'ip_address' => $request->ip(),
+        //     'user_agent' => $request->userAgent(),
+        //     'logged_in_at'   => now(),
+        //     'status'     => true,
+        //     'location'   => $this->getLocation($request->ip()), // optional
+        // ]);
 
         return redirect()->intended(RouteServiceProvider::HOME);
     }
@@ -56,13 +56,13 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
-        LoginHistory::where('user_id', $user->id)
-            ->where('status', true)
-            ->latest()
-            ->first()?->update([
-                'logout_at' => now(),
-                'status' => false
-            ]);
+        // LoginHistory::where('user_id', $user->id)
+        //     ->where('status', true)
+        //     ->latest()
+        //     ->first()?->update([
+        //         'logout_at' => now(),
+        //         'status' => false
+        //     ]);
 
         Auth::guard('web')->logout();
 

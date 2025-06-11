@@ -19,6 +19,7 @@ class SettingController extends Controller
         // return Inertia::render('Settings', ['user'=> $user]);
         $securityController = app(SecurityController::class);
         $loginHistory = $securityController->getLoginHistory($request);
+        
         return Inertia::render('Settings/Index', [
             'user' => [
                 'id' => $user->id,

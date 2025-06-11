@@ -11,7 +11,7 @@ import PreferenceSettings from "./Preferences"
 import SecuritySettings from "./Security"
 import PrivacySettings from "./Privacy"
 
-const SettingsIndex = ({ user, flash }) => {
+const SettingsIndex = ({ user, flash, loginHistory }) => {
   const [activeTab, setActiveTab] = useState("account")
 
   return (
@@ -64,7 +64,7 @@ const SettingsIndex = ({ user, flash }) => {
         </TabsContent>
 
         <TabsContent value="security">
-          <SecuritySettings user={user} />
+          <SecuritySettings user={user} loginHistory={loginHistory} />
         </TabsContent>
 
         <TabsContent value="privacy">

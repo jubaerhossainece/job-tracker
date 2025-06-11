@@ -20,7 +20,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-const SecuritySettings = ({ user }) => {
+const SecuritySettings = ({ user, loginHistory }) => {
+  // console.log(loginHistory, user);
   // Password form
   const {
     data: passwordData,
@@ -78,21 +79,6 @@ const SecuritySettings = ({ user }) => {
     }
   }
 
-  // const handleDeleteAccountSubmit = (e) => { // No longer needed
-  //   e.preventDefault();
-  //   if (confirm("Are you absolutely sure you want to delete your account? This action cannot be undone.")) {
-  //     deleteAccountFormAction(route("settings.account.delete"), {
-  //       preserveScroll: true,
-  //       onSuccess: () => {
-  //         resetDeleteAccountForm();
-  //       },
-  //       onError: () => {
-  //         // Handle specific errors
-  //       }
-  //     });
-  //   }
-  // };
-
   // Mock data for sessions (both active and login history from single table)
   const activeSessions = [
     {
@@ -113,35 +99,35 @@ const SecuritySettings = ({ user }) => {
     },
   ]
 
-  const loginHistory = [
-    {
-      id: 3,
-      location: "New York, NY",
-      ip: "192.168.1.1",
-      device: "Chrome on Windows",
-      time: "2 hours ago",
-      status: "success",
-      type: "login",
-    },
-    {
-      id: 4,
-      location: "San Francisco, CA",
-      ip: "192.168.1.2",
-      device: "Safari on iPhone",
-      time: "1 day ago",
-      status: "success",
-      type: "login",
-    },
-    {
-      id: 5,
-      location: "London, UK",
-      ip: "192.168.1.3",
-      device: "Firefox on Mac",
-      time: "3 days ago",
-      status: "failed",
-      type: "login",
-    },
-  ]
+  // const loginHistory = [
+  //   {
+  //     id: 3,
+  //     location: "New York, NY",
+  //     ip: "192.168.1.1",
+  //     device: "Chrome on Windows",
+  //     time: "2 hours ago",
+  //     status: "success",
+  //     type: "login",
+  //   },
+  //   {
+  //     id: 4,
+  //     location: "San Francisco, CA",
+  //     ip: "192.168.1.2",
+  //     device: "Safari on iPhone",
+  //     time: "1 day ago",
+  //     status: "success",
+  //     type: "login",
+  //   },
+  //   {
+  //     id: 5,
+  //     location: "London, UK",
+  //     ip: "192.168.1.3",
+  //     device: "Firefox on Mac",
+  //     time: "3 days ago",
+  //     status: "failed",
+  //     type: "login",
+  //   },
+  // ]
 
   return (
     <div className="space-y-6">
@@ -316,14 +302,14 @@ const SecuritySettings = ({ user }) => {
             {loginHistory.map((login) => (
               <div key={login.id} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-full ${login.status === "success" ? "bg-green-100" : "bg-red-100"}`}>
-                    <Monitor className={`h-4 w-4 ${login.status === "success" ? "text-green-600" : "text-red-600"}`} />
+                  <div className={`p-2 rounded-full ${login.login_successful ? "bg-green-100" : "bg-red-100"}`}>
+                    <Monitor className={`h-4 w-4 ${login.login_successful ? "text-green-600" : "text-red-600"}`} />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="font-medium">{login.device}</p>
-                      <Badge variant={login.status === "success" ? "default" : "destructive"} className="text-xs">
-                        {login.status}
+                      <p className="font-medium">{login.user_agent}</p>
+                      <Badge variant={login.login_successful ? "default" : "destructive"} className="text-xs">
+                        {login.login_successful ? 'Success' : 'Failed'}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -331,11 +317,11 @@ const SecuritySettings = ({ user }) => {
                         <MapPin className="h-3 w-3" />
                         {login.location}
                       </span>
-                      <span>IP: {login.ip}</span>
+                      <span>IP: {login.ip_address}</span>
                     </div>
                   </div>
                 </div>
-                <div className="text-sm text-muted-foreground">{login.time}</div>
+                <div className="text-sm text-muted-foreground">{login.login_at_human}</div>
               </div>
             ))}
           </div>

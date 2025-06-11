@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\LoginHistory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -25,7 +26,7 @@ class SecurityController extends Controller
 
         $user = Auth::user();
 
-        if(Hash::check($request->password, $user->password)) {
+        if (Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages(
                 ['password' => 'The new password must be different from the current password.']
             );
@@ -76,7 +77,10 @@ class SecurityController extends Controller
         $loginHistories = LoginHistory::where('user_id', $user->id)
             ->orderBy('login_at', 'desc')
             ->take($limit)
-            ->get();
+            ->get()->map(function ($item) {
+                $item->login_at_human = Carbon::parse($item->login_at)->diffForHumans();
+                return $item;
+            });
 
         // For an API endpoint, you'd return JSON.
         // However, this method will be called by another controller method 
