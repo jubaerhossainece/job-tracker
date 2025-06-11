@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Settings\SecurityController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -10,12 +12,13 @@ class SettingController extends Controller
     /**
      * Display the settings page.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
 
         // return Inertia::render('Settings', ['user'=> $user]);
-
+        $securityController = app(SecurityController::class);
+        $loginHistory = $securityController->getLoginHistory($request);
         return Inertia::render('Settings/Index', [
             'user' => [
                 'id' => $user->id,
@@ -42,7 +45,8 @@ class SettingController extends Controller
                 'email_verified_at' => $user->email_verified_at,
                 'created_at' => $user->created_at,
                 'resume_uploaded_at' => $user->resume_uploaded_at,
-            ]
+            ],
+            'loginHistory' => $loginHistory,
         ]);
     }
 }
