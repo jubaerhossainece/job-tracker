@@ -243,11 +243,13 @@ const SecuritySettings = ({ user, loginHistory: initialLoginHistory, activeSessi
                     </div>
                   </div>
                   {/* Revoke button placeholder - to be implemented if individual revoke is added */}
-                  {/* {!session.is_current_session && (
+                  {/* {  */}
+                  {!session.is_current_session && (
                     <Button variant="outline" size="sm" type="button">
                       Revoke
                     </Button>
-                  )} */}
+                  )} 
+                  {/* //  } */}
                 </div>
               ))
             ) : (
