@@ -19,7 +19,8 @@ class SettingController extends Controller
         // return Inertia::render('Settings', ['user'=> $user]);
         $securityController = app(SecurityController::class);
         $loginHistory = $securityController->getLoginHistory($request);
-        
+        $activeSessions = $securityController->getActiveSessions($request);
+
         return Inertia::render('Settings/Index', [
             'user' => [
                 'id' => $user->id,
@@ -48,6 +49,7 @@ class SettingController extends Controller
                 'resume_uploaded_at' => $user->resume_uploaded_at,
             ],
             'loginHistory' => $loginHistory,
+            'activeSessions'=> $activeSessions,
         ]);
     }
 }

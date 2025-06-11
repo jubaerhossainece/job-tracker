@@ -64,10 +64,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/settings/account/resume', [AccountController::class, 'removeResume'])->name('settings.account.resume.remove');
     Route::put('/settings/password', [SecurityController::class, 'updatePassword'])->name('settings.security.password.update');
     Route::delete('/settings/account', [SecurityController::class, 'destroy'])->name('settings.account.delete');
+    Route::post('/settings/security/logout-other-sessions', [SecurityController::class, 'logoutOtherSessions'])
+        ->name('settings.security.logout-other');
 
 
 
-    
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

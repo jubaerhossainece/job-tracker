@@ -20,8 +20,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-const SecuritySettings = ({ user, loginHistory }) => {
-  // console.log(loginHistory, user);
+const SecuritySettings = ({ user, loginHistory: initialLoginHistory, activeSessions: initialActiveSessions }) => { // Added activeSessions prop
   // Password form
   const {
     data: passwordData,
@@ -38,8 +37,6 @@ const SecuritySettings = ({ user, loginHistory }) => {
 
   // Two-factor form
   const {
-    // data: twoFactorData, // Not used yet
-    // setData: setTwoFactorData, // Not used yet
     post: postTwoFactor,
     delete: deleteTwoFactor,
     processing: twoFactorProcessing,
@@ -54,7 +51,7 @@ const SecuritySettings = ({ user, loginHistory }) => {
     errors: deleteAccountErrors,
     reset: resetDeleteAccountForm,
   } = useForm({
-    password: "", // For current password confirmation
+    password: "", 
   });
 
   const handlePasswordSubmit = (e) => {
@@ -79,59 +76,24 @@ const SecuritySettings = ({ user, loginHistory }) => {
     }
   }
 
-  // Mock data for sessions (both active and login history from single table)
-  const activeSessions = [
-    {
-      id: 1,
-      device: "Chrome on Windows",
-      location: "New York, NY",
-      lastActive: "Active now",
-      current: true,
-      type: "active_session",
-    },
-    {
-      id: 2,
-      device: "Safari on iPhone",
-      location: "San Francisco, CA",
-      lastActive: "2 hours ago",
-      current: false,
-      type: "active_session",
-    },
-  ]
+  const loginHistory = initialLoginHistory;
+  const activeSessions = initialActiveSessions; // Use prop data
 
-  // const loginHistory = [
+  // Mock data for active sessions REMOVED
+  // const activeSessions = [
   //   {
-  //     id: 3,
-  //     location: "New York, NY",
-  //     ip: "192.168.1.1",
+  //     id: 1,
   //     device: "Chrome on Windows",
-  //     time: "2 hours ago",
-  //     status: "success",
-  //     type: "login",
+  //     location: "New York, NY",
+  //     lastActive: "Active now",
+  //     current: true,
+  //     type: "active_session",
   //   },
-  //   {
-  //     id: 4,
-  //     location: "San Francisco, CA",
-  //     ip: "192.168.1.2",
-  //     device: "Safari on iPhone",
-  //     time: "1 day ago",
-  //     status: "success",
-  //     type: "login",
-  //   },
-  //   {
-  //     id: 5,
-  //     location: "London, UK",
-  //     ip: "192.168.1.3",
-  //     device: "Firefox on Mac",
-  //     time: "3 days ago",
-  //     status: "failed",
-  //     type: "login",
-  //   },
-  // ]
+  // ];
 
   return (
     <div className="space-y-6">
-      {/* Change Password */}
+      {/* Change Password Card ... (content unchanged) */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -193,7 +155,7 @@ const SecuritySettings = ({ user, loginHistory }) => {
         </CardContent>
       </Card>
 
-      {/* Two-Factor Authentication */}
+      {/* Two-Factor Authentication Card ... (content unchanged) */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -240,7 +202,7 @@ const SecuritySettings = ({ user, loginHistory }) => {
           </div>
         </CardContent>
       </Card>
-
+      
       {/* Active Sessions */}
       <Card>
         <CardHeader>
@@ -252,43 +214,50 @@ const SecuritySettings = ({ user, loginHistory }) => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {activeSessions.map((session) => (
-              <div key={session.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <Monitor className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium">{session.device}</p>
-                      {session.current && (
-                        <Badge variant="default" className="text-xs">
-                          Current
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        {session.location}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {session.lastActive}
-                      </span>
+            {activeSessions && activeSessions.length > 0 ? (
+              activeSessions.map((session) => (
+                <div key={session.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Monitor className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                    <div className="min-w-0 flex-1"> {/* Added for better truncation and layout */}
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium truncate" title={session.user_agent_raw || session.device_info}>{session.device_info || 'Unknown Device'}</p>
+                        {session.is_current_session && (
+                          <Badge variant="default" className="text-xs flex-shrink-0">
+                            Current
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground mt-1">
+                        {session.ip_address && ( 
+                          <span className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3 flex-shrink-0" /> 
+                            {session.ip_address}
+                          </span>
+                        )}
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3 flex-shrink-0" />
+                          {session.last_activity}
+                        </span>
+                      </div>
                     </div>
                   </div>
+                  {/* Revoke button placeholder - to be implemented if individual revoke is added */}
+                  {/* {!session.is_current_session && (
+                    <Button variant="outline" size="sm" type="button">
+                      Revoke
+                    </Button>
+                  )} */}
                 </div>
-                {!session.current && (
-                  <Button variant="outline" size="sm">
-                    Revoke
-                  </Button>
-                )}
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">No active sessions found.</p>
+            )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Login History */}
+      {/* Login History Card ... (content mostly unchanged, uses loginHistory prop) */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -299,36 +268,52 @@ const SecuritySettings = ({ user, loginHistory }) => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {loginHistory.map((login) => (
-              <div key={login.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-full ${login.login_successful ? "bg-green-100" : "bg-red-100"}`}>
-                    <Monitor className={`h-4 w-4 ${login.login_successful ? "text-green-600" : "text-red-600"}`} />
+            {loginHistory && loginHistory.length > 0 ? (
+              loginHistory.map((login) => (
+                <div key={login.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-full ${login.login_successful ? "bg-green-100" : "bg-red-100"}`}>
+                      <Monitor className={`h-4 w-4 ${login.login_successful ? "text-green-600" : "text-red-600"}`} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium truncate" title={login.user_agent}>{login.user_agent || 'N/A'}</p>
+                        <Badge variant={login.login_successful ? "default" : "destructive"} className="text-xs flex-shrink-0">
+                          {login.login_successful ? "Success" : "Failed"}
+                        </Badge>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground mt-1">
+                        {login.ip_address && (
+                          <span>IP: {login.ip_address}</span>
+                        )}
+                        {login.location && login.location !== 'Location N/A' && login.location !== 'Localhost' && (
+                           <span className="flex items-center gap-1">
+                             <MapPin className="h-3 w-3 flex-shrink-0" />
+                             {login.location}
+                           </span>
+                        )}
+                         {login.location === 'Localhost' && (
+                           <span className="flex items-center gap-1">
+                             <MapPin className="h-3 w-3 flex-shrink-0" />
+                             Localhost
+                           </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium">{login.user_agent}</p>
-                      <Badge variant={login.login_successful ? "default" : "destructive"} className="text-xs">
-                        {login.login_successful ? 'Success' : 'Failed'}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        {login.location}
-                      </span>
-                      <span>IP: {login.ip_address}</span>
-                    </div>
+                  <div className="text-sm text-muted-foreground text-right flex-shrink-0 ml-2">
+                    {login.login_at_human || (login.login_at ? new Date(login.login_at).toLocaleString() : 'N/A')}
                   </div>
                 </div>
-                <div className="text-sm text-muted-foreground">{login.login_at_human}</div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">No login history available.</p>
+            )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Delete Account */}
+      {/* Delete Account Card ... (content unchanged) */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-destructive">
@@ -340,7 +325,7 @@ const SecuritySettings = ({ user, loginHistory }) => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4"> {/* Changed from form to div to handle AlertDialog correctly */}
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="current_password_for_delete">Current Password</Label>
               <Input
@@ -350,7 +335,7 @@ const SecuritySettings = ({ user, loginHistory }) => {
                 value={deleteAccountData.password}
                 onChange={(e) => setDeleteAccountData("password", e.target.value)}
                 placeholder="Enter your current password to confirm"
-                disabled={deleteAccountProcessing} // Disable input while processing
+                disabled={deleteAccountProcessing}
               />
               {deleteAccountErrors.password && (
                 <p className="text-sm text-red-500">{deleteAccountErrors.password}</p>
@@ -359,7 +344,7 @@ const SecuritySettings = ({ user, loginHistory }) => {
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button type="button" variant="destructive" disabled={deleteAccountProcessing || !deleteAccountData.password}> {/* Disable if no password or processing */}
+                <Button type="button" variant="destructive" disabled={deleteAccountProcessing || !deleteAccountData.password}>
                   {deleteAccountProcessing ? "Deleting..." : "Delete Account"}
                 </Button>
               </AlertDialogTrigger>
@@ -379,12 +364,10 @@ const SecuritySettings = ({ user, loginHistory }) => {
                         preserveScroll: true,
                         onSuccess: () => {
                           resetDeleteAccountForm();
-                          // router.visit('/'); // Optionally redirect
                         },
-                        // onError is implicitly handled by useForm errors object
                       });
                     }}
-                    disabled={deleteAccountProcessing || !deleteAccountData.password} // Also disable action if no password
+                    disabled={deleteAccountProcessing || !deleteAccountData.password}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
                     {deleteAccountProcessing ? "Deleting..." : "Confirm Delete"}

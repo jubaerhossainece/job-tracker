@@ -7,10 +7,12 @@ use App\Models\LoginHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
+use Jenssegers\Agent\Agent;
 
 class SecurityController extends Controller
 {
@@ -90,5 +92,64 @@ class SecurityController extends Controller
         // If it were a pure XHR API, it would return response()->json(...).
         // For now, let's assume it's called internally by another controller or a page route.
         return $loginHistories;
+    }
+
+
+
+    /**
+     * Get active sessions for the authenticated user.
+     */
+    public function getActiveSessions(Request $request)
+    {
+        if (config('session.driver') !== 'database') {
+            return collect(); 
+        }
+
+        $userId = Auth::id();
+        $currentSessionId = $request->session()->getId(); 
+        $agentParser = new Agent();
+
+        $sessions = DB::table(config('session.table', 'sessions'))
+            ->where('user_id', $userId)
+            ->orderBy('last_activity', 'desc')
+            ->get();
+
+        return $sessions->map(function ($session) use ($agentParser, $currentSessionId) {
+            $agentParser->setUserAgent($session->user_agent); 
+
+            return (object) [
+                'id' => $session->id,
+                'ip_address' => $session->ip_address,
+                'device_info' => $agentParser->browser() . ' on ' . $agentParser->platform(),
+                'browser' => $agentParser->browser(),
+                'platform' => $agentParser->platform(),
+                'is_current_session' => $session->id === $currentSessionId,
+                'last_activity' => Carbon::createFromTimestamp($session->last_activity)->diffForHumans(),
+                'last_activity_raw' => $session->last_activity, 
+                'user_agent_raw' => $session->user_agent, 
+            ];
+        });
+    }
+
+    /**
+     * Log out from other browser sessions.
+     */
+    public function logoutOtherSessions(Request $request)
+    {
+        $request->validateWithBag('logoutOtherSessions', [ 
+            'password' => ['required', 'current_password'],
+        ]);
+
+        if (Auth::logoutOtherDevices($request->password)) {
+            // This typically triggers a new session ID for the current device as well,
+            // so the frontend might need to be aware or re-fetch session data if it was displaying it.
+            // For now, just returning success.
+            return back()->with('success', 'Successfully logged out from other browser sessions.');
+        }
+
+        // This part might not be reached if current_password validation fails (throws ValidationException)
+        // or if logoutOtherDevices itself throws an exception on some internal failure.
+        // However, if logoutOtherDevices could return false without an exception:
+        return back()->withErrors(['password' => __('Could not log out from other browser sessions.')], 'logoutOtherSessions');
     }
 }
