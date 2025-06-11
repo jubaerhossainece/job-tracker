@@ -509,7 +509,7 @@ const AccountSettings = ({ user }) => {
                   <p className="font-medium">Current Resume</p>
                   {user.resume_uploaded_at ? (
                     <p className="text-sm text-muted-foreground">
-                      Uploaded on {new Date(user.resume_uploaded_at).toLocaleDateString()}
+                      Uploaded on {new Date(user.resume_uploaded_at).toLocaleString()}
                     </p>
                   ) : (
                     <p className="text-sm text-muted-foreground">Uploaded on (date not available)</p>

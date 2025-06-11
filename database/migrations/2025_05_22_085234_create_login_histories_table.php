@@ -12,26 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('login_histories', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('session_id')->nullable(); // null for login history records
-            $table->string('ip_address', 45);
-            $table->text('user_agent');
-            $table->string('device_type')->nullable(); // mobile, desktop, tablet
-            $table->string('browser')->nullable();
-            $table->string('platform')->nullable();
-            $table->string('location')->nullable(); // City, Country
-            $table->enum('type', ['login', 'active_session']); // distinguish between login history and active sessions
-            $table->enum('status', ['success', 'failed', 'blocked', 'active', 'expired'])->default('success');
-            $table->string('failure_reason')->nullable(); // for failed login attempts
-            $table->timestamp('last_activity')->nullable(); // for active sessions
-            $table->timestamp('logged_in_at'); // when the login/session started
-            $table->boolean('is_current')->default(false); // current active session
-            $table->timestamps();
-            
-            $table->index(['user_id', 'type', 'logged_in_at']);
-            $table->index(['user_id', 'is_current']);
-            $table->index(['session_id']);
+            Schema::create('login_histories', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('user_id')->nullable()->index();
+                $table->string('ip_address')->nullable();
+                $table->text('user_agent')->nullable();
+                $table->timestamp('login_at')->useCurrent();
+                $table->boolean('login_successful');
+                $table->timestamps();
+            });
         });
     }
 
