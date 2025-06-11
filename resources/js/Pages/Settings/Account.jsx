@@ -10,9 +10,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { useForm } from "@inertiajs/react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const AccountSettings = ({ user }) => {
-  console.log('User prop in AccountSettings:', JSON.stringify(user, null, 2)); // <--- ADD THIS LINE
+  // console.log('User prop in AccountSettings:', JSON.stringify(user, null, 2)); // Log the user prop
   // Account form
   const {
     data: accountData,
@@ -66,7 +77,7 @@ const AccountSettings = ({ user }) => {
     data: photoData,
     setData: setPhotoData,
     post: postPhoto,
-    delete: deletePhoto,
+    delete: deletePhoto, // This is router.delete for form helper
     processing: photoProcessing,
     errors: photoErrors,
     reset: resetPhoto,
@@ -79,7 +90,7 @@ const AccountSettings = ({ user }) => {
     data: resumeData,
     setData: setResumeData,
     post: postResume,
-    delete: deleteResume,
+    delete: deleteResume, // This is router.delete for form helper
     processing: resumeProcessing,
     errors: resumeErrors,
     reset: resetResume,
@@ -126,17 +137,17 @@ const AccountSettings = ({ user }) => {
     })
   }
 
-  const handleRemovePhoto = () => {
-    if (confirm("Are you sure you want to remove your profile photo?")) {
-      deletePhoto(route("settings.account.photo.remove"))
-    }
-  }
+  // const handleRemovePhoto = () => { // Replaced by AlertDialog
+  //   if (confirm("Are you sure you want to remove your profile photo?")) {
+  //     deletePhoto(route("settings.account.photo.remove"))
+  //   }
+  // }
 
-  const handleRemoveResume = () => {
-    if (confirm("Are you sure you want to remove your resume?")) {
-      deleteResume(route("settings.account.resume.remove"))
-    }
-  }
+  // const handleRemoveResume = () => { // Replaced by AlertDialog
+  //   if (confirm("Are you sure you want to remove your resume?")) {
+  //     deleteResume(route("settings.account.resume.remove"))
+  //   }
+  // }
 
   return (
     <div className="space-y-6">
@@ -187,10 +198,31 @@ const AccountSettings = ({ user }) => {
                   )}
                 </form>
                 {user.photo && (
-                  <Button variant="outline" size="sm" onClick={handleRemovePhoto}>
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Remove
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" size="sm" type="button">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Remove
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Remove Profile Photo?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to remove your profile photo? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => deletePhoto(route("settings.account.photo.remove"))}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Confirm Remove
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 )}
               </div>
               <p className="text-xs text-muted-foreground">JPG, PNG or GIF. Max size 2MB.</p>
@@ -475,9 +507,13 @@ const AccountSettings = ({ user }) => {
                 </div>
                 <div>
                   <p className="font-medium">Current Resume</p>
-                  <p className="text-sm text-muted-foreground">
-                    Uploaded on {new Date(user.resume_uploaded_at).toLocaleString()}
-                  </p>
+                  {user.resume_uploaded_at ? (
+                    <p className="text-sm text-muted-foreground">
+                      Uploaded on {new Date(user.resume_uploaded_at).toLocaleDateString()}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Uploaded on (date not available)</p>
+                  )}
                 </div>
               </div>
               <div className="flex gap-2">
@@ -487,10 +523,31 @@ const AccountSettings = ({ user }) => {
                     View
                   </a>
                 </Button>
-                <Button variant="outline" size="sm" onClick={handleRemoveResume}>
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Remove
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" size="sm" type="button">
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Remove
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Remove Resume?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to remove your resume? This will delete the file permanently.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => deleteResume(route("settings.account.resume.remove"))}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Confirm Remove
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
           ) : (

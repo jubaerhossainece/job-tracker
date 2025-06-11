@@ -40,7 +40,7 @@ class AuthenticatedSessionController extends Controller
             'user_id'    => $user->id,
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
-            'login_at'   => now(),
+            'logged_in_at'   => now(),
             'status'     => true,
             'location'   => $this->getLocation($request->ip()), // optional
         ]);
